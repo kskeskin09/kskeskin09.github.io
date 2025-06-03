@@ -132,7 +132,7 @@
             z-index: 2; /* Diğer elementlerin üzerinde kalması için */
         }
 
-        /* Hava Durumu */
+        /* Hava Durumu Widget'ı */
         .weather-widget {
             position: absolute;
             top: 20px;
@@ -174,8 +174,42 @@
 
         /* Nem ve Konum için aynı punto */
         .weather-info .info-text {
-            font-size: 0.9em; /* Parçalı bulutlu yazısıyla aynı punto */
+            font-size: 0.9em;
             margin-top: 2px; /* Elemanlar arası biraz boşluk */
+        }
+
+        /* Saat Widget'ı */
+        .clock-widget {
+            position: absolute;
+            top: 20px;
+            right: 20px; /* Sağa hizala */
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column; /* Dikey sıralama */
+            align-items: flex-end; /* Sağ tarafa hizala */
+            gap: 5px; /* Elemanlar arası boşluk */
+            color: inherit;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        body.dark-theme .clock-widget {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .clock-widget .time-display {
+            font-size: 1.8em; /* Saatin ana boyutu */
+            font-weight: 600;
+            display: flex;
+            gap: 2px; /* Saat, dakika, saniye arası boşluk */
+        }
+
+        .clock-widget .date-display {
+            font-size: 0.9em; /* Tarih bilgisi boyutu */
+            text-align: right; /* Sağa hizala */
         }
 
         /* Arama Çubuğu */
@@ -329,25 +363,33 @@
                 padding: 10px 15px;
                 font-size: 0.8em;
             }
-
             .weather-info .temp {
                 font-size: 1.2em;
             }
-
             .weather-icon {
                 font-size: 2em; /* Responsive Font Awesome ikon boyutu */
+            }
+
+            .clock-widget {
+                top: 10px;
+                right: 10px;
+                padding: 10px 15px;
+            }
+            .clock-widget .time-display {
+                font-size: 1.5em;
+            }
+            .clock-widget .date-display {
+                font-size: 0.8em;
             }
 
             .search-form {
                 max-width: 90%;
                 padding: 6px;
             }
-
             .search-input {
                 font-size: 1em;
                 padding: 8px 15px;
             }
-
             .search-button {
                 padding: 8px 15px;
                 font-size: 0.9em;
@@ -357,7 +399,6 @@
                 gap: 10px;
                 margin-top: 20px; /* Responsive için mesafe azaltıldı */
             }
-
             .quick-link-item {
                 width: 45px; /* Responsive için küçült */
                 height: 45px;
@@ -391,6 +432,19 @@
             .weather-icon {
                 font-size: 1.8em; /* Daha küçük ekranlar için Font Awesome ikon boyutu */
             }
+
+            .clock-widget {
+                top: 10px;
+                right: 10px;
+                padding: 8px 12px;
+            }
+            .clock-widget .time-display {
+                font-size: 1.3em;
+            }
+            .clock-widget .date-display {
+                font-size: 0.7em;
+            }
+
             .search-form {
                 flex-direction: column;
                 border-radius: 15px;
@@ -448,7 +502,18 @@
         <i id="weatherIcon" class="weather-icon fas"></i>
         <div class="weather-info">
             <span id="weatherTemp" class="temp"></span>
-            <span id="weatherHumidity" class="info-text"></span> <span id="weatherCity" class="info-text"></span>     </div>
+            <span id="weatherHumidity" class="info-text"></span>
+            <span id="weatherCity" class="info-text"></span>
+        </div>
+    </div>
+
+    <div class="clock-widget">
+        <div class="time-display">
+            <span id="clockHour" class="time-part hour"></span>:<span id="clockMinute" class="time-part minute"></span>:<span id="clockSecond" class="time-part second"></span>
+        </div>
+        <div class="date-display">
+            <span id="clockDay" class="date-part day"></span> <span id="clockMonth" class="date-part month"></span> <span id="clockYear" class="date-part year"></span> <span id="clockDayOfWeek" class="date-part day-of-week"></span>
+        </div>
     </div>
 
     <div class="main-content">
@@ -487,10 +552,20 @@
 
         const weatherIconElem = document.getElementById('weatherIcon');
         const weatherTempElem = document.getElementById('weatherTemp');
-        const weatherHumidityElem = document.getElementById('weatherHumidity'); // Yeni nem elementi
+        const weatherHumidityElem = document.getElementById('weatherHumidity');
         const weatherCityElem = document.getElementById('weatherCity');
         const errorMessageElem = document.getElementById('errorMessage');
         const searchInput = document.getElementById('searchInput');
+
+        // Clock elements
+        const clockHourElem = document.getElementById('clockHour');
+        const clockMinuteElem = document.getElementById('clockMinute');
+        const clockSecondElem = document.getElementById('clockSecond');
+        const clockDayOfWeekElem = document.getElementById('clockDayOfWeek');
+        const clockDayElem = document.getElementById('clockDay');
+        const clockMonthElem = document.getElementById('clockMonth');
+        const clockYearElem = document.getElementById('clockYear');
+
 
         // Tema Algılama ve Uygulama
         function applyTheme(isDark) {
@@ -599,7 +674,6 @@
                 weatherIconElem.className = `weather-icon fas ${iconClass}`; // fas: solid ikonlar için
 
                 weatherIconElem.style.display = 'block'; // İkonu görünür yap
-                // weatherDescElem.style.display = 'none'; // Açıklamayı gizledik
             } else {
                 weatherTempElem.textContent = 'Bilgi yok';
                 weatherHumidityElem.textContent = '';
@@ -609,6 +683,34 @@
                 console.error('Visual Crossing API yanıtında veri bulunamadı veya boş:', data);
             }
         }
+
+        // Saati Güncelleme Fonksiyonu
+        function updateClock() {
+            const now = new Date();
+
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            const daysOfWeek = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+            const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+            const dayOfWeek = daysOfWeek[now.getDay()];
+            const day = now.getDate();
+            const month = months[now.getMonth()];
+            const year = now.getFullYear();
+
+            clockHourElem.textContent = hours;
+            clockMinuteElem.textContent = minutes;
+            clockSecondElem.textContent = seconds;
+            
+            // Tarih sırasını değiştir: Gün Ay Yıl Haftanın Günü (virgül kaldırıldı)
+            clockDayElem.textContent = day;
+            clockMonthElem.textContent = month;
+            clockYearElem.textContent = year;
+            clockDayOfWeekElem.textContent = dayOfWeek; 
+        }
+
 
         // Kullanıcının konumunu al ve hava durumunu göster
         function getUserLocationWeather() {
@@ -637,6 +739,8 @@
         // Sayfa yüklendiğinde çalışacak fonksiyonlar
         document.addEventListener('DOMContentLoaded', () => {
             getUserLocationWeather(); // Hava durumunu al
+            updateClock(); // Saati hemen göster
+            setInterval(updateClock, 1000); // Saati her saniye güncelle
             searchInput.focus(); // Arama çubuğuna odaklan
         });
     </script>
