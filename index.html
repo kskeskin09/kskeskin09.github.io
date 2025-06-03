@@ -1,1 +1,644 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kerem Şükrü Keskin | Başlangıç Sayfası</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Genel Sıfırlamalar ve Temel Stiller */
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* İçeriği yukarıdan başlat */
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Bulanık ışıkların taşmasını engelle */
+            position: relative; /* Bulanık ışıklar için */
+            transition: background-color 0.5s ease; /* Tema geçişi için */
+            color: #333; /* Açık tema varsayılan metin rengi */
+            padding-top: 100px; /* Tüm içeriği aşağı itmek için */
+        }
 
+        /* Tema Tabanlı Arka Plan Renkleri */
+        body.light-theme {
+            background-color: #ffffff;
+            color: #333;
+        }
+
+        body.dark-theme {
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+        }
+
+        /* Bulanık Işıklar (Blobs) */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px); /* Bulanıklık efekti */
+            opacity: 0.6;
+            animation: blob-move 20s infinite alternate ease-in-out;
+            z-index: -1; /* İçeriğin arkasında kalması için */
+        }
+
+        /* Açık Tema Işık Renkleri */
+        body.light-theme .blob {
+            background-color: rgba(173, 216, 230, 0.7); /* Açık mavi */
+        }
+
+        /* Koyu Tema Işık Renkleri */
+        body.dark-theme .blob {
+            background-color: rgba(65, 105, 225, 0.7); /* Koyu mavi (lacivert değil) */
+        }
+
+        /* Blob Boyutları ve Konumları */
+        .blob:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: 10%;
+            left: 15%;
+            animation-delay: 0s;
+        }
+
+        .blob:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            bottom: 20%;
+            right: 10%;
+            animation-delay: 5s;
+        }
+
+        .blob:nth-child(3) {
+            width: 250px;
+            height: 250px;
+            top: 30%;
+            right: 20%;
+            animation-delay: 10s;
+        }
+
+        .blob:nth-child(4) {
+            width: 350px;
+            height: 350px;
+            bottom: 5%;
+            left: 30%;
+            animation-delay: 15s;
+        }
+
+        /* Blob Animasyonu */
+        @keyframes blob-move {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            25% {
+                transform: translate(20px, -30px) scale(1.1);
+            }
+            50% {
+                transform: translate(-10px, 40px) scale(0.9);
+            }
+            75% {
+                transform: translate(30px, 10px) scale(1.05);
+            }
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+        }
+
+        /* Ana İçerik Konteyneri */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1; /* İçeriğin bulanık ışıkların üzerinde kalması için */
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            box-sizing: border-box;
+            margin-top: 50px; /* Başlık ve arama kutusu arasındaki mesafeyi ayarla */
+        }
+
+        /* Başlık */
+        .title {
+            position: absolute;
+            top: 80px; /* Ekranın üstünden boşluk, aşağı indirildi */
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: 700;
+            color: inherit; /* Tema rengini miras al */
+            transition: color 0.5s ease;
+            z-index: 2; /* Diğer elementlerin üzerinde kalması için */
+        }
+
+        /* Hava Durumu */
+        .weather-widget {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(255, 255, 255, 0.1); /* Hafif şeffaf arka plan */
+            backdrop-filter: blur(10px); /* Arka planı bulanıklaştır */
+            border-radius: 12px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: inherit; /* Tema rengini miras al */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        body.dark-theme .weather-widget {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .weather-icon {
+            font-size: 2.5em; /* Font Awesome ikon boyutu */
+            color: inherit; /* Temaya göre renk alsın */
+            display: block; /* İkonu tekrar göster */
+            width: 50px; /* Kutuyla aynı boyutta olması için */
+            text-align: center; /* İkonu ortala */
+        }
+
+        .weather-info {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.9em;
+        }
+
+        .weather-info .temp {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+
+        /* Nem ve Konum için aynı punto */
+        .weather-info .info-text {
+            font-size: 0.9em; /* Parçalı bulutlu yazısıyla aynı punto */
+            margin-top: 2px; /* Elemanlar arası biraz boşluk */
+        }
+
+        /* Arama Çubuğu */
+        .search-form {
+            display: flex;
+            width: 100%;
+            max-width: 600px; /* Chrome'a benzer boyut */
+            background-color: rgba(255, 255, 255, 0.15); /* Hafif şeffaf */
+            backdrop-filter: blur(10px);
+            border-radius: 30px; /* Yuvarlak köşeler */
+            padding: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.5s ease, box-shadow 0.3s ease;
+        }
+
+        body.dark-theme .search-form {
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        .search-form:focus-within {
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-input {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            padding: 10px 20px;
+            font-size: 1.1em;
+            color: inherit; /* Tema rengini miras al */
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.7); /* Koyu temada daha görünür */
+        }
+
+        body.light-theme .search-input::placeholder {
+            color: rgba(51, 51, 51, 0.6);
+        }
+
+        .search-button {
+            background-color: #4285f4; /* Google mavisi */
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-button:hover {
+            background-color: #357ae8;
+        }
+
+        /* Hızlı Erişim Linkleri */
+        .quick-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px; /* Boşluğu azaltıldı */
+            margin-top: 25px; /* Arama kutusuyla arasındaki mesafe azaltıldı */
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .quick-link-item {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border-radius: 50%; /* Yuvarlak yap */
+            width: 50px; /* Sabit genişlik, küçültüldü */
+            height: 50px; /* Sabit yükseklik, küçültüldü */
+            display: flex; /* İçeriği ortalamak için flexbox kullan */
+            justify-content: center; /* Yatayda ortala */
+            align-items: center; /* Dikeyde ortala */
+            text-decoration: none;
+            color: inherit;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-theme .quick-link-item {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .quick-link-item:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        body.dark-theme .quick-link-item:hover {
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .quick-link-item .icon {
+            width: 60%; /* SVG ikonun boyutunu kapsayıcıya göre ayarla */
+            height: 60%;
+            color: inherit; /* Temaya göre renk alsın */
+        }
+
+        /* Hata Mesajı */
+        .error-message {
+            color: #e74c3c;
+            margin-top: 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        /* Gemini İkonu */
+        .gemini-icon {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(66, 133, 244, 0.7); /* Google mavisi, hafif şeffaf */
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8em; /* İkon boyutu */
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            z-index: 10; /* Diğer elementlerin üzerinde kalması için */
+            cursor: pointer;
+        }
+
+        .gemini-icon:hover {
+            background-color: #357ae8; /* Koyu Google mavisi */
+            transform: translateY(-3px);
+        }
+
+        /* Responsive Ayarlar */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 80px; /* Responsive için padding-top */
+            }
+            .title {
+                font-size: 1.8em;
+                top: 50px; /* Responsive için başlık konumu */
+            }
+
+            .weather-widget {
+                top: 10px;
+                left: 10px;
+                padding: 10px 15px;
+                font-size: 0.8em;
+            }
+
+            .weather-info .temp {
+                font-size: 1.2em;
+            }
+
+            .weather-icon {
+                font-size: 2em; /* Responsive Font Awesome ikon boyutu */
+            }
+
+            .search-form {
+                max-width: 90%;
+                padding: 6px;
+            }
+
+            .search-input {
+                font-size: 1em;
+                padding: 8px 15px;
+            }
+
+            .search-button {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+
+            .quick-links {
+                gap: 10px;
+                margin-top: 20px; /* Responsive için mesafe azaltıldı */
+            }
+
+            .quick-link-item {
+                width: 45px; /* Responsive için küçült */
+                height: 45px;
+            }
+            .quick-link-item .icon {
+                width: 65%;
+                height: 65%;
+            }
+
+            .gemini-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 1.5em;
+                bottom: 15px;
+                right: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding-top: 60px; /* Daha küçük ekranlar için padding-top */
+            }
+            .title {
+                font-size: 1.5em;
+                top: 30px; /* Daha küçük ekranlar için başlık konumu */
+            }
+            .weather-widget {
+                font-size: 0.7em;
+                padding: 8px 12px;
+            }
+            .weather-icon {
+                font-size: 1.8em; /* Daha küçük ekranlar için Font Awesome ikon boyutu */
+            }
+            .search-form {
+                flex-direction: column;
+                border-radius: 15px;
+                padding: 0;
+            }
+            .search-input {
+                width: calc(100% - 30px); /* Padding'i hesaba kat */
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 15px 15px 0 0;
+                padding: 15px;
+                text-align: center;
+            }
+            body.light-theme .search-input {
+                border-bottom: 1px solid rgba(51, 51, 51, 0.2);
+            }
+            .search-button {
+                width: 100%;
+                border-radius: 0 0 15px 15px;
+                padding: 15px;
+            }
+            .quick-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+                margin-top: 15px; /* Daha küçük ekranlar için mesafe azaltıldı */
+            }
+            .quick-link-item {
+                width: 40px; /* Daha da küçült */
+                height: 40px;
+            }
+            .quick-link-item .icon {
+                width: 60%;
+                height: 60%;
+            }
+            .gemini-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.3em;
+                bottom: 10px;
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body class="light-theme">
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+
+    <h1 class="title">Kerem Şükrü Keskin</h1>
+
+    <div class="weather-widget">
+        <i id="weatherIcon" class="weather-icon fas"></i>
+        <div class="weather-info">
+            <span id="weatherTemp" class="temp"></span>
+            <span id="weatherHumidity" class="info-text"></span> <span id="weatherCity" class="info-text"></span>     </div>
+    </div>
+
+    <div class="main-content">
+        <form action="https://www.google.com/search" method="get" class="search-form">
+            <input type="text" name="q" id="searchInput" class="search-input" placeholder="Google'da Ara..." autofocus>
+            <button type="submit" class="search-button">Ara</button>
+        </form>
+
+        <div class="quick-links">
+            <a href="https://youtube.com" target="_blank" class="quick-link-item" title="YouTube">
+                <svg viewBox="0 0 24 24" fill="currentColor" class="icon">
+                    <path d="M21.54 6.54a3.1 3.1 0 0 0-2.19-2.19C17.82 4 12 4 12 4s-5.82 0-7.35.35a3.1 3.1 0 0 0-2.19 2.19C2 8.18 2 12 2 12s0 3.82.35 5.35a3.1 3.1 0 0 0 2.19 2.19C6.18 20 12 20 12 20s5.82 0 7.35-.35a3.1 3.1 0 0 0 2.19-2.19C22 15.82 22 12 22 12s0-3.82-.35-5.35zM10 15.5v-7l6 3.5-6 3.5z"/>
+                </svg>
+            </a>
+            <a href="https://mail.google.com/" target="_blank" class="quick-link-item" title="Gmail">
+                <svg viewBox="0 0 24 24" fill="currentColor" class="icon">
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                </svg>
+            </a>
+            <a href="https://chat.openai.com/" target="_blank" class="quick-link-item" title="ChatGPT">
+                <svg viewBox="0 0 24 24" fill="currentColor" class="icon">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.5 13.5h-7V8.5h7v7zM10 10.5v3h4v-3h-4z"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <a href="https://gemini.google.com/" target="_blank" class="gemini-icon" title="Gemini'ye Git">✨</a>
+
+    <p id="errorMessage" class="error-message"></p>
+
+    <script>
+        // Visual Crossing API Anahtarınız
+        const VISUALCROSSING_API_KEY = 'N7JPMD9V7XRM6PQY7R7TJWZTS';
+        const VISUALCROSSING_BASE_URL = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/';
+
+        const weatherIconElem = document.getElementById('weatherIcon');
+        const weatherTempElem = document.getElementById('weatherTemp');
+        const weatherHumidityElem = document.getElementById('weatherHumidity'); // Yeni nem elementi
+        const weatherCityElem = document.getElementById('weatherCity');
+        const errorMessageElem = document.getElementById('errorMessage');
+        const searchInput = document.getElementById('searchInput');
+
+        // Tema Algılama ve Uygulama
+        function applyTheme(isDark) {
+            const body = document.body;
+            if (isDark) {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+            } else {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
+            }
+        }
+
+        // Cihazın tema tercihini kontrol et
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        applyTheme(prefersDarkScheme.matches);
+
+        // Tema tercihi değiştiğinde güncelle
+        prefersDarkScheme.addEventListener('change', (e) => {
+            applyTheme(e.matches);
+        });
+
+        // Visual Crossing ikon isimlerini Font Awesome sınıflarına eşleme
+        function getFontAwesomeIconClass(vcIconName) {
+            switch (vcIconName) {
+                case 'clear-day':
+                    return 'fa-sun';
+                case 'clear-night':
+                    return 'fa-moon';
+                case 'partly-cloudy-day':
+                    return 'fa-cloud-sun';
+                case 'partly-cloudy-night':
+                    return 'fa-cloud-moon';
+                case 'cloudy':
+                    return 'fa-cloud';
+                case 'rain':
+                    return 'fa-cloud-showers-heavy';
+                case 'showers-day':
+                case 'showers-night':
+                    return 'fa-cloud-rain';
+                case 'thunder-rain':
+                case 'thunder-showers-day':
+                case 'thunder-showers-night':
+                case 'thunder':
+                    return 'fa-bolt';
+                case 'snow':
+                case 'snow-showers-day':
+                case 'snow-showers-night':
+                    return 'fa-snowflake';
+                case 'fog':
+                    return 'fa-smog';
+                case 'wind':
+                    return 'fa-wind';
+                case 'sleet':
+                    return 'fa-cloud-meatball'; // Karışık yağış için
+                case 'hail':
+                    return 'fa-cloud-showers-heavy'; // Dolu için benzer ikon
+                default:
+                    return 'fa-question-circle'; // Bilinmeyen ikonlar için
+            }
+        }
+
+        // Hava Durumu Verisi Çekme
+        async function getWeatherData(city, lat, lon) {
+            errorMessageElem.textContent = ''; // Önceki hataları temizle
+
+            let requestLocation = city; // Varsayılan olarak şehir adı
+            if (lat && lon) {
+                requestLocation = `${lat},${lon}`; // Koordinatlar varsa onları kullan
+            } else if (!city) {
+                // Konum bilgisi yoksa varsayılan olarak Gebze'yi kullan
+                requestLocation = 'Gebze';
+            }
+
+            // Visual Crossing API isteği için URL oluşturma
+            // include=current: Sadece anlık koşulları getir
+            // unitGroup=metric: Metrik birimleri kullan (Celsius)
+            // lang=tr: Yanıt dilini Türkçe yap (koşullar için)
+            const url = `${VISUALCROSSING_BASE_URL}${requestLocation}?key=${VISUALCROSSING_API_KEY}&unitGroup=metric&include=current&lang=tr`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Hava durumu bilgileri alınamadı.');
+                }
+                const data = await response.json();
+                console.log('Visual Crossing API Response:', data); // API yanıtını konsola yazdır
+                displayWeatherData(data);
+            } catch (error) {
+                errorMessageElem.textContent = `Hava durumu hatası: ${error.message}`;
+                console.error('Hava durumu verisi çekilirken hata oluştu:', error);
+            }
+        }
+
+        // Hava Durumu Verisini Ekrana Basma
+        function displayWeatherData(data) {
+            if (data.currentConditions) {
+                const current = data.currentConditions;
+                weatherTempElem.textContent = `${Math.round(current.temp)}°C`;
+                weatherHumidityElem.textContent = `Nem: ${Math.round(current.humidity)}%`; // Nem bilgisini ekledik
+                weatherCityElem.textContent = data.resolvedAddress.split(',')[0]; // Şehir adını aldık
+
+                // Font Awesome ikon sınıfını ayarla
+                const iconClass = getFontAwesomeIconClass(current.icon);
+                weatherIconElem.className = `weather-icon fas ${iconClass}`; // fas: solid ikonlar için
+
+                weatherIconElem.style.display = 'block'; // İkonu görünür yap
+                // weatherDescElem.style.display = 'none'; // Açıklamayı gizledik
+            } else {
+                weatherTempElem.textContent = 'Bilgi yok';
+                weatherHumidityElem.textContent = '';
+                weatherCityElem.textContent = '';
+                weatherIconElem.style.display = 'none'; // Veri yoksa ikonu gizle
+                errorMessageElem.textContent = 'Hava durumu verisi bulunamadı. Lütfen API limitlerinizi veya konumunuzu kontrol edin.';
+                console.error('Visual Crossing API yanıtında veri bulunamadı veya boş:', data);
+            }
+        }
+
+        // Kullanıcının konumunu al ve hava durumunu göster
+        function getUserLocationWeather() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        getWeatherData(null, position.coords.latitude, position.coords.longitude);
+                    },
+                    (error) => {
+                        console.warn('Konum alınamadı, varsayılan şehre geçiliyor:', error);
+                        // Konum izni verilmezse veya hata olursa varsayılan şehri kullan
+                        getWeatherData('Gebze'); // Varsayılan şehir adı
+                    },
+                    {
+                        enableHighAccuracy: false,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                console.warn('Tarayıcı konum servislerini desteklemiyor, varsayılan şehre geçiliyor.');
+                getWeatherData('Gebze'); // Geolocation desteklenmiyorsa varsayılan şehir
+            }
+        }
+
+        // Sayfa yüklendiğinde çalışacak fonksiyonlar
+        document.addEventListener('DOMContentLoaded', () => {
+            getUserLocationWeather(); // Hava durumunu al
+            searchInput.focus(); // Arama çubuğuna odaklan
+        });
+    </script>
+</body>
+</html>
