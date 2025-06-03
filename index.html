@@ -243,6 +243,20 @@
             color: inherit; /* Tema rengini miras al */
         }
 
+        /* Otomatik doldurma arka planını ve metin rengini şeffaf yap */
+        .search-input:-webkit-autofill,
+        .search-input:-webkit-autofill:hover, 
+        .search-input:-webkit-autofill:focus, 
+        .search-input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+            background-color: transparent !important;
+            color: inherit !important; /* Metin rengini temaya uygun tut */
+            -webkit-text-fill-color: inherit !important; /* Webkit tabanlı tarayıcılar için metin rengini koru */
+            font-size: inherit !important; /* Puntoyu koru */
+            transition: background-color 5000s ease-in-out 0s; /* Geçişi yavaşlatarak görünmez yap */
+        }
+
+
         .search-input::placeholder {
             color: rgba(255, 255, 255, 0.7); /* Koyu temada daha görünür */
         }
@@ -322,32 +336,6 @@
             display: none; /* Varsayılan olarak gizli */
         }
 
-        /* Gemini İkonu */
-        .gemini-icon {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background-color: rgba(66, 133, 244, 0.7); /* Google mavisi, hafif şeffaf */
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.8em; /* İkon boyutu */
-            text-decoration: none;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            z-index: 10; /* Diğer elementlerin üzerinde kalması için */
-            cursor: pointer;
-        }
-
-        .gemini-icon:hover {
-            background-color: #357ae8; /* Koyu Google mavisi */
-            transform: translateY(-3px);
-        }
-
         /* Responsive Ayarlar */
         @media (max-width: 768px) {
             body {
@@ -407,14 +395,6 @@
             .quick-link-item .icon {
                 width: 65%;
                 height: 65%;
-            }
-
-            .gemini-icon {
-                width: 45px;
-                height: 45px;
-                font-size: 1.5em;
-                bottom: 15px;
-                right: 15px;
             }
         }
 
@@ -481,13 +461,6 @@
                 width: 60%;
                 height: 60%;
             }
-            .gemini-icon {
-                width: 40px;
-                height: 40px;
-                font-size: 1.3em;
-                bottom: 10px;
-                right: 10px;
-            }
         }
     </style>
 </head>
@@ -541,8 +514,6 @@
             </a>
         </div>
     </div>
-
-    <a href="https://gemini.google.com/" target="_blank" class="gemini-icon" title="Gemini'ye Git">✨</a>
 
     <p id="errorMessage" class="error-message"></p>
 
