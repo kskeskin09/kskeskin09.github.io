@@ -319,6 +319,7 @@
             margin-top: 15px;
             font-weight: 600;
             text-align: center;
+            display: none; /* Varsayılan olarak gizli */
         }
 
         /* Gemini İkonu */
@@ -631,6 +632,7 @@
         // Hava Durumu Verisi Çekme
         async function getWeatherData(city, lat, lon) {
             errorMessageElem.textContent = ''; // Önceki hataları temizle
+            errorMessageElem.style.display = 'none'; // Hata mesajını başlangıçta gizle
 
             let requestLocation = city; // Varsayılan olarak şehir adı
             if (lat && lon) {
@@ -657,29 +659,42 @@
                 displayWeatherData(data);
             } catch (error) {
                 errorMessageElem.textContent = `Hava durumu hatası: ${error.message}`;
+                errorMessageElem.style.display = 'block'; // Hata olduğunda göster
                 console.error('Hava durumu verisi çekilirken hata oluştu:', error);
             }
         }
 
         // Hava Durumu Verisini Ekrana Basma
         function displayWeatherData(data) {
+            // Tüm hava durumu bilgi elementlerini varsayılan olarak gizle
+            weatherTempElem.style.display = 'none';
+            weatherHumidityElem.style.display = 'none';
+            weatherCityElem.style.display = 'none';
+            weatherIconElem.style.display = 'none';
+            errorMessageElem.textContent = ''; // Önceki hata mesajlarını temizle
+            errorMessageElem.style.display = 'none'; // Başarılı olunca hata mesajını gizle
+
             if (data.currentConditions) {
                 const current = data.currentConditions;
                 weatherTempElem.textContent = `${Math.round(current.temp)}°C`;
-                weatherHumidityElem.textContent = `Nem: ${Math.round(current.humidity)}%`; // Nem bilgisini ekledik
-                weatherCityElem.textContent = data.resolvedAddress.split(',')[0]; // Şehir adını aldık
+                weatherHumidityElem.textContent = `Nem: ${Math.round(current.humidity)}%`;
+                weatherCityElem.textContent = data.resolvedAddress.split(',')[0];
+
+                // Elementleri görünür yap
+                weatherTempElem.style.display = 'block';
+                weatherHumidityElem.style.display = 'block';
+                weatherCityElem.style.display = 'block';
 
                 // Font Awesome ikon sınıfını ayarla
                 const iconClass = getFontAwesomeIconClass(current.icon);
                 weatherIconElem.className = `weather-icon fas ${iconClass}`; // fas: solid ikonlar için
-
                 weatherIconElem.style.display = 'block'; // İkonu görünür yap
+
             } else {
-                weatherTempElem.textContent = 'Bilgi yok';
-                weatherHumidityElem.textContent = '';
-                weatherCityElem.textContent = '';
-                weatherIconElem.style.display = 'none'; // Veri yoksa ikonu gizle
+                weatherTempElem.textContent = 'Bilgi yok'; // Veri yoksa "Bilgi yok" göster
+                // Diğer elementlerin textContent'ini ayarlamaya gerek yok, çünkü gizlenecekler
                 errorMessageElem.textContent = 'Hava durumu verisi bulunamadı. Lütfen API limitlerinizi veya konumunuzu kontrol edin.';
+                errorMessageElem.style.display = 'block'; // Hata olduğunda göster
                 console.error('Visual Crossing API yanıtında veri bulunamadı veya boş:', data);
             }
         }
