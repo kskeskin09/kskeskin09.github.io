@@ -12,15 +12,15 @@
             font-family: 'Inter', sans-serif;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start; /* İçeriği yukarıdan başlat */
-            align-items: center;
+            justify-content: center; /* İçeriği dikeyde ortala */
+            align-items: center; /* İçeriği yatayda ortala */
             min-height: 100vh;
             margin: 0;
             overflow: hidden; /* Bulanık ışıkların taşmasını engelle */
             position: relative; /* Bulanık ışıklar için */
             transition: background-color 0.5s ease; /* Tema geçişi için */
             color: #333; /* Açık tema varsayılan metin rengi */
-            padding-top: 100px; /* Tüm içeriği aşağı itmek için */
+            /* padding-top kaldırıldı, içerik artık ortalanıyor */
         }
 
         /* Tema Tabanlı Arka Plan Renkleri */
@@ -117,19 +117,19 @@
             max-width: 900px;
             padding: 20px;
             box-sizing: border-box;
-            margin-top: 50px; /* Başlık ve arama kutusu arasındaki mesafeyi ayarla */
+            /* margin-top kaldırıldı, başlık artık main-content içinde */
         }
 
         /* Başlık */
         .title {
-            position: absolute;
-            top: 80px; /* Ekranın üstünden boşluk, aşağı indirildi */
+            /* position: absolute ve top kaldırıldı, artık main-content içinde */
             text-align: center;
             font-size: 2.5em;
             font-weight: 700;
             color: inherit; /* Tema rengini miras al */
             transition: color 0.5s ease;
             z-index: 2; /* Diğer elementlerin üzerinde kalması için */
+            margin-bottom: 40px; /* Arama kutusuyla arasındaki boşluk */
         }
 
         /* Hava Durumu Widget'ı */
@@ -339,11 +339,11 @@
         /* Responsive Ayarlar */
         @media (max-width: 768px) {
             body {
-                padding-top: 80px; /* Responsive için padding-top */
+                padding-top: 0; /* Responsive için padding-top kaldırıldı */
             }
             .title {
                 font-size: 1.8em;
-                top: 50px; /* Responsive için başlık konumu */
+                margin-bottom: 30px; /* Responsive için boşluk ayarı */
             }
 
             .weather-widget {
@@ -400,11 +400,11 @@
 
         @media (max-width: 480px) {
             body {
-                padding-top: 60px; /* Daha küçük ekranlar için padding-top */
+                padding-top: 0; /* Daha küçük ekranlar için padding-top kaldırıldı */
             }
             .title {
                 font-size: 1.5em;
-                top: 30px; /* Daha küçük ekranlar için başlık konumu */
+                margin-bottom: 20px; /* Daha küçük ekranlar için boşluk ayarı */
             }
             .weather-widget {
                 font-size: 0.7em;
@@ -470,27 +470,9 @@
     <div class="blob"></div>
     <div class="blob"></div>
 
-    <h1 class="title">Kerem Şükrü Keskin</h1>
-
-    <div class="weather-widget">
-        <i id="weatherIcon" class="weather-icon fas"></i>
-        <div class="weather-info">
-            <span id="weatherTemp" class="temp"></span>
-            <span id="weatherHumidity" class="info-text"></span>
-            <span id="weatherCity" class="info-text"></span>
-        </div>
-    </div>
-
-    <div class="clock-widget">
-        <div class="time-display">
-            <span id="clockHour" class="time-part hour"></span>:<span id="clockMinute" class="time-part minute"></span>:<span id="clockSecond" class="time-part second"></span>
-        </div>
-        <div class="date-display">
-            <span id="clockDay" class="date-part day"></span> <span id="clockMonth" class="date-part month"></span> <span id="clockYear" class="date-part year"></span> <span id="clockDayOfWeek" class="date-part day-of-week"></span>
-        </div>
-    </div>
-
     <div class="main-content">
+        <h1 class="title">Kerem Şükrü Keskin</h1>
+
         <form action="https://www.google.com/search" method="get" class="search-form" target="_blank">
             <input type="text" name="q" id="searchInput" class="search-input" placeholder="Google'da Ara..." autofocus>
             <button type="submit" class="search-button">Ara</button>
@@ -512,6 +494,24 @@
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.5 13.5h-7V8.5h7v7zM10 10.5v3h4v-3h-4z"/>
                 </svg>
             </a>
+        </div>
+    </div>
+
+    <div class="weather-widget">
+        <i id="weatherIcon" class="weather-icon fas"></i>
+        <div class="weather-info">
+            <span id="weatherTemp" class="temp"></span>
+            <span id="weatherHumidity" class="info-text"></span>
+            <span id="weatherCity" class="info-text"></span>
+        </div>
+    </div>
+
+    <div class="clock-widget">
+        <div class="time-display">
+            <span id="clockHour" class="time-part hour"></span>:<span id="clockMinute" class="time-part minute"></span>:<span id="clockSecond" class="time-part second"></span>
+        </div>
+        <div class="date-display">
+            <span id="clockDay" class="date-part day"></span> <span id="clockMonth" class="date-part month"></span> <span id="clockYear" class="date-part year"></span> <span id="clockDayOfWeek" class="date-part day-of-week"></span>
         </div>
     </div>
 
