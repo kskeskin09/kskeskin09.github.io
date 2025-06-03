@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kerem Şükrü Keskin | Başlangıç Sayfası</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /* Genel Sıfırlamalar ve Temel Stiller */
@@ -369,6 +368,41 @@
             background-color: rgba(0, 0, 0, 0.4);
         }
 
+        /* Gemini Butonu */
+        .gemini-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8em;
+            color: inherit;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        body.dark-theme .gemini-button {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .gemini-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        body.dark-theme .gemini-button:hover {
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
 
         /* Responsive Ayarlar */
         @media (max-width: 768px) {
@@ -437,6 +471,14 @@
                 font-size: 1.5em;
                 bottom: 15px;
                 left: 15px;
+            }
+
+            .gemini-button {
+                width: 45px;
+                height: 45px;
+                font-size: 1.5em;
+                bottom: 15px;
+                right: 15px;
             }
         }
 
@@ -511,6 +553,14 @@
                 bottom: 10px;
                 left: 10px;
             }
+
+            .gemini-button {
+                width: 40px;
+                height: 40px;
+                font-size: 1.3em;
+                bottom: 10px;
+                right: 10px;
+            }
         }
     </style>
 </head>
@@ -560,9 +610,12 @@
         </div>
     </div>
 
-    <!-- Yeni Gmail butonu -->
     <a href="https://mail.google.com/" target="_blank" class="gmail-button">
         <i class="fas fa-envelope"></i>
+    </a>
+
+    <a href="https://gemini.google.com/" target="_blank" class="gemini-button">
+        <i class="fas fa-star"></i>
     </a>
 
     <p id="errorMessage" class="error-message"></p>
