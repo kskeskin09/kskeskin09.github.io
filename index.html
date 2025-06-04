@@ -735,12 +735,12 @@
             // Nominatim API isteği için URL oluşturma
             // format=json: JSON formatında yanıt al
             // lat, lon: Enlem ve boylam
-            // zoom=14: Detay seviyesi (ilçe/kasaba için uygun)
+            // zoom=16: Detay seviyesi (ilçe/kasaba için daha uygun)
             // addressdetails=1: Adres bileşenlerini detaylı olarak al
             // accept-language=tr: Türkçe sonuçları tercih et
             // user-agent: Nominatim kullanım politikası gereği bir user-agent belirtmek önemlidir.
-            // Kendi e-posta adresinizi veya uygulama adınızı kullanabilirsiniz.
-            const nominatimUrl = `${NOMINATIM_BASE_URL}?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1&accept-language=tr&user-agent=my-personal-homepage-app`;
+            // Örneğin: 'https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=16&addressdetails=1&accept-language=tr&user-agent=my-personal-homepage-app'
+            const nominatimUrl = `${NOMINATIM_BASE_URL}?format=json&lat=${lat}&lon=${lon}&zoom=16&addressdetails=1&accept-language=tr&user-agent=my-personal-homepage-app`;
 
             try {
                 const response = await fetch(nominatimUrl);
@@ -756,16 +756,19 @@
                     // İlçe veya benzeri bir yerleşim yeri adını öncelikli olarak ara
                     if (address.city_district) return address.city_district; // Büyük şehirlerdeki belirgin ilçeler için
                     if (address.town) return address.town; // Kasaba olarak geçen ilçeler için
-                    if (address.city && address.city !== address.suburb) return address.city; // Şehir adını kullan, ancak mahalle ile aynı değilse
+                    if (address.municipality) return address.municipality; // Belediyeler için (bazı yerlerde ilçe yerine geçer)
+                    if (address.district) return address.district; // Genel ilçe terimi
+                    if (address.village) return address.village; // Köy veya küçük yerleşim yeri
 
                     // Eğer daha spesifik bir ilçe bulunamazsa, suburb'a bak, ancak dikkatli ol
                     if (address.suburb) {
                         // Eğer suburb, "Merkez" gibi genel bir ifade değilse ve şehir ile aynı değilse
-                        if (!['Center', 'Merkez'].includes(address.suburb) && address.suburb !== address.city) {
+                        if (!['Center', 'Merkez', 'center'].includes(address.suburb) && address.suburb !== address.city) {
                             return address.suburb;
                         }
                     }
-                    if (address.county) return address.county; // Daha az tercih edilen bir düşüş
+                    if (address.city) return address.city; // Şehir adını kullan
+                    if (address.county) return address.county; // Daha az tercih edilen bir düşüş (ilçe/bölge)
 
                     // Hiçbir uygun bileşen bulunamazsa, display_name'in ilk kısmını döndür
                     if (data.display_name) return data.display_name.split(',')[0].trim();
