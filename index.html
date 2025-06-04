@@ -630,15 +630,15 @@
         }
 
         // Hava Durumu Verisi Çekme
-        async function getWeatherData(locationName, lat, lon, actualDistrictName) {
+        async function getWeatherData(locationName, lat, lon, actualProvinceName) {
             errorMessageElem.textContent = ''; // Önceki hataları temizle
             errorMessageElem.style.display = 'none'; // Hata mesajını başlangıçta gizle
 
-            let requestLocation = locationName; // Varsayılan olarak ilçe adı veya koordinatlar
+            let requestLocation = locationName; // Varsayılan olarak il adı veya koordinatlar
             if (!locationName && lat && lon) {
-                requestLocation = `${lat},${lon}`; // Eğer ilçe adı yoksa ama koordinatlar varsa, koordinatları kullan
+                requestLocation = `${lat},${lon}`; // Eğer il adı yoksa ama koordinatlar varsa, koordinatları kullan
             } else if (!locationName && !lat && !lon) {
-                requestLocation = 'Gebze'; // Hiçbir konum bilgisi yoksa varsayılan olarak Gebze'yi kullan
+                requestLocation = 'Kocaeli'; // Hiçbir konum bilgisi yoksa varsayılan olarak Kocaeli'yi kullan
             }
 
             // Visual Crossing API isteği için URL oluşturma
@@ -652,7 +652,7 @@
                 }
                 const data = await response.json();
                 console.log('Visual Crossing API Response:', data); // API yanıtını konsola yazdır
-                displayWeatherData(data, actualDistrictName); // OpenCage'den gelen ilçe adını da gönder
+                displayWeatherData(data, actualProvinceName); // OpenCage'den gelen il adını da gönder
             } catch (error) {
                 errorMessageElem.textContent = `Hava durumu hatası: ${error.message}`;
                 errorMessageElem.style.display = 'block'; // Hata olduğunda göster
@@ -661,7 +661,7 @@
         }
 
         // Hava Durumu Verisini Ekrana Basma
-        function displayWeatherData(data, actualDistrictName) {
+        function displayWeatherData(data, actualProvinceName) {
             // Tüm hava durumu bilgi elementlerini varsayılan olarak gizle
             weatherTempElem.style.display = 'none';
             weatherHumidityElem.style.display = 'none';
@@ -675,11 +675,11 @@
                 weatherTempElem.textContent = `${Math.round(current.temp)}°C`;
                 weatherHumidityElem.textContent = `Nem: ${Math.round(current.humidity)}%`;
 
-                // OpenCage'den gelen ilçe adını öncelikli olarak kullan
-                if (actualDistrictName) {
-                    weatherCityElem.textContent = actualDistrictName;
+                // OpenCage'den gelen il adını öncelikli olarak kullan
+                if (actualProvinceName) {
+                    weatherCityElem.textContent = actualProvinceName;
                 } else if (data.resolvedAddress) {
-                    // Eğer OpenCage'den ilçe adı gelmezse, Visual Crossing'in resolvedAddress'inin ilk kısmını kullan
+                    // Eğer OpenCage'den il adı gelmezse, Visual Crossing'in resolvedAddress'inin ilk kısmını kullan
                     weatherCityElem.textContent = data.resolvedAddress.split(',')[0].trim();
                 } else {
                     weatherCityElem.textContent = 'Bilinmeyen Konum';
@@ -731,8 +731,8 @@
             clockDayOfWeekElem.textContent = dayOfWeek;
         }
 
-        // Koordinatlardan ilçe adını al (OpenCage kullanarak)
-        async function getDistrictNameFromCoordinates(lat, lon) {
+        // Koordinatlardan il adını al (OpenCage kullanarak)
+        async function getProvinceNameFromCoordinates(lat, lon) {
             if (!OPENCAGE_API_KEY) {
                 errorMessageElem.textContent = 'OpenCage API anahtarı ayarlanmadı. Lütfen kodu güncelleyin.';
                 errorMessageElem.style.display = 'block';
@@ -759,21 +759,13 @@
                 if (data.results && data.results.length > 0) {
                     const components = data.results[0].components;
 
-                    // OpenCage yanıtındaki adres bileşenlerini kontrol ederek ilçe adını al
-                    // Türkiye için 'county' genellikle ilçe anlamına gelir.
-                    if (components.county) return components.county;
-                    if (components.city_district) return components.city_district;
-                    if (components.town) return components.town;
-                    if (components.city) return components.city; // Eğer ilçe bulunamazsa şehri kullan
+                    // OpenCage yanıtındaki adres bileşenlerini kontrol ederek il adını al
+                    // Türkiye için 'state' veya 'province' il anlamına gelir.
+                    if (components.state) return components.state; // Örn: İstanbul, Kocaeli
+                    if (components.province) return components.province; // Bazı ülkelerde eyalet/il karşılığı
 
-                    // Daha genel bir düşüş, eğer yukarıdakiler bulunamazsa
-                    if (components.suburb && 
-                        !components.suburb.toLowerCase().includes('mah.') && 
-                        !components.suburb.toLowerCase().includes('mahallesi')
-                    ) {
-                        return components.suburb;
-                    }
-                    if (components.village) return components.village;
+                    // Eğer daha spesifik bir il bulunamazsa, şehri kullan (büyükşehirler için il adıyla aynıdır)
+                    if (components.city) return components.city;
 
                     // Son çare olarak formatted adresin ilk kısmını döndür
                     if (data.results[0].formatted) return data.results[0].formatted.split(',')[0].trim();
@@ -794,17 +786,17 @@
                     async (position) => {
                         const lat = position.coords.latitude;
                         const lon = position.coords.longitude;
-                        const districtName = await getDistrictNameFromCoordinates(lat, lon); // OpenCage kullanılarak ilçe adı çekilir
+                        const provinceName = await getProvinceNameFromCoordinates(lat, lon); // OpenCage kullanılarak il adı çekilir
 
-                        // Hava durumu API'sine OpenCage'den gelen ilçe adını (eğer varsa) gönder
-                        // Visual Crossing'e gönderilecek konum, OpenCage'den gelen ilçe adı veya koordinatlar olacaktır.
+                        // Hava durumu API'sine OpenCage'den gelen il adını (eğer varsa) gönder
+                        // Visual Crossing'e gönderilecek konum, OpenCage'den gelen il adı veya koordinatlar olacaktır.
                         // displayWeatherData fonksiyonu OpenCage adını önceliklendirecek.
-                        getWeatherData(districtName || `${lat},${lon}`, lat, lon, districtName);
+                        getWeatherData(provinceName || `${lat},${lon}`, lat, lon, provinceName);
                     },
                     (error) => {
                         console.warn('Konum alınamadı, varsayılan şehre geçiliyor:', error);
                         // Konum izni verilmezse veya hata olursa varsayılan şehri kullan
-                        getWeatherData('Gebze'); // Varsayılan şehir adı
+                        getWeatherData('Kocaeli'); // Varsayılan il adı
                     },
                     {
                         enableHighAccuracy: true, // Daha yüksek hassasiyet iste
@@ -814,7 +806,7 @@
                 );
             } else {
                 console.warn('Tarayıcı konum servislerini desteklemiyor, varsayılan şehre geçiliyor.');
-                getWeatherData('Gebze'); // Geolocation desteklenmiyorsa varsayılan şehir
+                getWeatherData('Kocaeli'); // Geolocation desteklenmiyorsa varsayılan il
             }
         }
 
