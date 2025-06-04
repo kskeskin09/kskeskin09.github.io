@@ -187,7 +187,7 @@
             padding: 15px 20px;
             display: flex;
             flex-direction: column; /* Dikey sıralama */
-            align-items: flex-end; /* Sağ tarafa hizala */
+            align-items: flex-end; /* İçeriği sağ tarafa hizala */
             gap: 5px; /* Elemanlar arası boşluk */
             color: inherit;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -203,11 +203,13 @@
             font-weight: 600;
             display: flex;
             gap: 2px; /* Saat, dakika, saniye arası boşluk */
+            font-variant-numeric: tabular-nums; /* Sayıların sabit genişlikte olmasını sağlar */
+            text-align: right; /* Saati sağa hizala */
         }
 
         .clock-widget .date-display {
             font-size: 0.9em; /* Tarih bilgisi boyutu */
-            text-align: right; /* Sağa hizala */
+            text-align: right; /* Tarihi sağa hizala */
         }
 
         /* Arama Çubuğu */
