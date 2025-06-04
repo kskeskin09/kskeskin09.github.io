@@ -545,6 +545,8 @@
         const VISUALCROSSING_BASE_URL = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/';
 
         // Nominatim Ters Coğrafi Kodlama API URL'si
+        // Nominatim'in kullanım politikasına uygun olarak lütfen kendi e-posta adresinizi 'user-agent' parametresinde belirtin.
+        // Örneğin: 'https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1&accept-language=tr&user-agent=your-email@example.com'
         const NOMINATIM_BASE_URL = 'https://nominatim.openstreetmap.org/reverse';
 
         const weatherIconElem = document.getElementById('weatherIcon');
@@ -627,23 +629,18 @@
         }
 
         // Hava Durumu Verisi Çekme
-        async function getWeatherData(locationName, lat, lon) {
+        async function getWeatherData(locationName, lat, lon, actualDistrictNameFromNominatim) {
             errorMessageElem.textContent = ''; // Önceki hataları temizle
             errorMessageElem.style.display = 'none'; // Hata mesajını başlangıçta gizle
 
-            let requestLocation = locationName; // Varsayılan olarak ilçe adı
+            let requestLocation = locationName; // Varsayılan olarak ilçe adı veya koordinatlar
             if (!locationName && lat && lon) {
-                // Eğer ilçe adı yoksa ama koordinatlar varsa, koordinatları kullan
-                requestLocation = `${lat},${lon}`;
+                requestLocation = `${lat},${lon}`; // Eğer ilçe adı yoksa ama koordinatlar varsa, koordinatları kullan
             } else if (!locationName && !lat && !lon) {
-                // Hiçbir konum bilgisi yoksa varsayılan olarak Gebze'yi kullan
-                requestLocation = 'Gebze';
+                requestLocation = 'Gebze'; // Hiçbir konum bilgisi yoksa varsayılan olarak Gebze'yi kullan
             }
 
             // Visual Crossing API isteği için URL oluşturma
-            // include=current: Sadece anlık koşulları getir
-            // unitGroup=metric: Metrik birimleri kullan (Celsius)
-            // lang=tr: Yanıt dilini Türkçe yap (koşullar için)
             const url = `${VISUALCROSSING_BASE_URL}${requestLocation}?key=${VISUALCROSSING_API_KEY}&unitGroup=metric&include=current&lang=tr`;
 
             try {
@@ -654,7 +651,7 @@
                 }
                 const data = await response.json();
                 console.log('Visual Crossing API Response:', data); // API yanıtını konsola yazdır
-                displayWeatherData(data);
+                displayWeatherData(data, actualDistrictNameFromNominatim); // Nominatim'den gelen ilçe adını da gönder
             } catch (error) {
                 errorMessageElem.textContent = `Hava durumu hatası: ${error.message}`;
                 errorMessageElem.style.display = 'block'; // Hata olduğunda göster
@@ -663,7 +660,7 @@
         }
 
         // Hava Durumu Verisini Ekrana Basma
-        function displayWeatherData(data) {
+        function displayWeatherData(data, actualDistrictNameFromNominatim) {
             // Tüm hava durumu bilgi elementlerini varsayılan olarak gizle
             weatherTempElem.style.display = 'none';
             weatherHumidityElem.style.display = 'none';
@@ -677,12 +674,13 @@
                 weatherTempElem.textContent = `${Math.round(current.temp)}°C`;
                 weatherHumidityElem.textContent = `Nem: ${Math.round(current.humidity)}%`;
 
-                // Eğer API yanıtında resolvedAddress varsa ve boş değilse kullan
-                if (data.resolvedAddress) {
-                    // resolvedAddress'ten sadece ilk kısmı (ilçe/şehir) al
+                // Nominatim'den gelen ilçe adını öncelikli olarak kullan
+                if (actualDistrictNameFromNominatim) {
+                    weatherCityElem.textContent = actualDistrictNameFromNominatim;
+                } else if (data.resolvedAddress) {
+                    // Eğer Nominatim'den ilçe adı gelmezse, Visual Crossing'in resolvedAddress'inin ilk kısmını kullan
                     weatherCityElem.textContent = data.resolvedAddress.split(',')[0].trim();
                 } else {
-                    // resolvedAddress yoksa veya boşsa "Bilinmeyen Konum" yaz
                     weatherCityElem.textContent = 'Bilinmeyen Konum';
                 }
 
@@ -740,7 +738,9 @@
             // zoom=14: Detay seviyesi (ilçe/kasaba için uygun)
             // addressdetails=1: Adres bileşenlerini detaylı olarak al
             // accept-language=tr: Türkçe sonuçları tercih et
-            const nominatimUrl = `${NOMINATIM_BASE_URL}?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1&accept-language=tr`;
+            // user-agent: Nominatim kullanım politikası gereği bir user-agent belirtmek önemlidir.
+            // Kendi e-posta adresinizi veya uygulama adınızı kullanabilirsiniz.
+            const nominatimUrl = `${NOMINATIM_BASE_URL}?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1&accept-language=tr&user-agent=my-personal-homepage-app`;
 
             try {
                 const response = await fetch(nominatimUrl);
@@ -782,12 +782,9 @@
                         const lon = position.coords.longitude;
                         const districtName = await getDistrictNameFromCoordinates(lat, lon); // Nominatim kullanılarak ilçe adı çekilir
 
-                        if (districtName) {
-                            getWeatherData(districtName, lat, lon); // İlçe adını ve koordinatları hava durumu API'sine gönder
-                        } else {
-                            console.warn('İlçe adı alınamadı, koordinatlarla hava durumu çekiliyor.');
-                            getWeatherData(null, lat, lon); // İlçe adı alınamazsa koordinatları kullan
-                        }
+                        // Hava durumu API'sine hem Nominatim'den gelen ilçe adını (eğer varsa)
+                        // hem de koordinatları gönder. displayWeatherData Nominatim adını önceliklendirecek.
+                        getWeatherData(districtName || `${lat},${lon}`, lat, lon, districtName);
                     },
                     (error) => {
                         console.warn('Konum alınamadı, varsayılan şehre geçiliyor:', error);
