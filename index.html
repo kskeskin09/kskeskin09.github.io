@@ -383,8 +383,8 @@
                 padding: 6px;
             }
             .search-input {
-                font-size: 1em;
-                padding: 8px 15px;
+                    font-size: 1em;
+                    padding: 8px 15px;
             }
             .search-button {
                 padding: 8px 15px;
@@ -544,6 +544,9 @@
         const VISUALCROSSING_API_KEY = 'N7JPMD9V7XRM6PQY7R7TJWZTS';
         const VISUALCROSSING_BASE_URL = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/';
 
+        // Nominatim Ters Coğrafi Kodlama API URL'si
+        const NOMINATIM_BASE_URL = 'https://nominatim.openstreetmap.org/reverse';
+
         const weatherIconElem = document.getElementById('weatherIcon');
         const weatherTempElem = document.getElementById('weatherTemp');
         const weatherHumidityElem = document.getElementById('weatherHumidity');
@@ -624,15 +627,16 @@
         }
 
         // Hava Durumu Verisi Çekme
-        async function getWeatherData(city, lat, lon) {
+        async function getWeatherData(locationName, lat, lon) {
             errorMessageElem.textContent = ''; // Önceki hataları temizle
             errorMessageElem.style.display = 'none'; // Hata mesajını başlangıçta gizle
 
-            let requestLocation = city; // Varsayılan olarak şehir adı
-            if (lat && lon) {
-                requestLocation = `${lat},${lon}`; // Koordinatlar varsa onları kullan
-            } else if (!city) {
-                // Konum bilgisi yoksa varsayılan olarak Gebze'yi kullan
+            let requestLocation = locationName; // Varsayılan olarak ilçe adı
+            if (!locationName && lat && lon) {
+                // Eğer ilçe adı yoksa ama koordinatlar varsa, koordinatları kullan
+                requestLocation = `${lat},${lon}`;
+            } else if (!locationName && !lat && !lon) {
+                // Hiçbir konum bilgisi yoksa varsayılan olarak Gebze'yi kullan
                 requestLocation = 'Gebze';
             }
 
@@ -672,7 +676,15 @@
                 const current = data.currentConditions;
                 weatherTempElem.textContent = `${Math.round(current.temp)}°C`;
                 weatherHumidityElem.textContent = `Nem: ${Math.round(current.humidity)}%`;
-                weatherCityElem.textContent = data.resolvedAddress.split(',')[0];
+
+                // Eğer API yanıtında resolvedAddress varsa ve boş değilse kullan
+                if (data.resolvedAddress) {
+                    // resolvedAddress'ten sadece ilk kısmı (ilçe/şehir) al
+                    weatherCityElem.textContent = data.resolvedAddress.split(',')[0].trim();
+                } else {
+                    // resolvedAddress yoksa veya boşsa "Bilinmeyen Konum" yaz
+                    weatherCityElem.textContent = 'Bilinmeyen Konum';
+                }
 
                 // Elementleri görünür yap
                 weatherTempElem.style.display = 'block';
@@ -720,13 +732,62 @@
             clockDayOfWeekElem.textContent = dayOfWeek;
         }
 
+        // Koordinatlardan ilçe adını al (Nominatim kullanarak)
+        async function getDistrictNameFromCoordinates(lat, lon) {
+            // Nominatim API isteği için URL oluşturma
+            // format=json: JSON formatında yanıt al
+            // lat, lon: Enlem ve boylam
+            // zoom=14: Detay seviyesi (ilçe/kasaba için uygun)
+            // addressdetails=1: Adres bileşenlerini detaylı olarak al
+            // accept-language=tr: Türkçe sonuçları tercih et
+            const nominatimUrl = `${NOMINATIM_BASE_URL}?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1&accept-language=tr`;
+
+            try {
+                const response = await fetch(nominatimUrl);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Coğrafi kodlama bilgileri alınamadı.');
+                }
+                const data = await response.json();
+                console.log('Nominatim API Response:', data);
+
+                if (data.address) {
+                    const address = data.address;
+                    // İlçe veya benzeri bir yerleşim yeri adını öncelikli olarak ara
+                    if (address.suburb) return address.suburb;
+                    if (address.city_district) return address.city_district;
+                    if (address.town) return address.town;
+                    if (address.village) return address.village;
+                    // Eğer daha spesifik bir ilçe bulunamazsa, şehri veya ilçeyi (county) dene
+                    if (address.city) return address.city;
+                    if (address.county) return address.county;
+                    // Hiçbir uygun bileşen bulunamazsa, display_name'in ilk kısmını döndür
+                    if (data.display_name) return data.display_name.split(',')[0].trim();
+                }
+                return null; // Uygun adres bileşeni bulunamadı
+            } catch (error) {
+                errorMessageElem.textContent = `Konum adı hatası: ${error.message}`;
+                errorMessageElem.style.display = 'block';
+                console.error('Coğrafi kodlama verisi çekilirken hata oluştu:', error);
+                return null;
+            }
+        }
 
         // Kullanıcının konumunu al ve hava durumunu göster
-        function getUserLocationWeather() {
+        async function getUserLocationWeather() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        getWeatherData(null, position.coords.latitude, position.coords.longitude);
+                    async (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        const districtName = await getDistrictNameFromCoordinates(lat, lon); // Nominatim kullanılarak ilçe adı çekilir
+
+                        if (districtName) {
+                            getWeatherData(districtName, lat, lon); // İlçe adını ve koordinatları hava durumu API'sine gönder
+                        } else {
+                            console.warn('İlçe adı alınamadı, koordinatlarla hava durumu çekiliyor.');
+                            getWeatherData(null, lat, lon); // İlçe adı alınamazsa koordinatları kullan
+                        }
                     },
                     (error) => {
                         console.warn('Konum alınamadı, varsayılan şehre geçiliyor:', error);
