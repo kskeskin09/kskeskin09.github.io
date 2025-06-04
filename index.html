@@ -544,10 +544,11 @@
         const VISUALCROSSING_API_KEY = 'N7JPMD9V7XRM6PQY7R7TJWZTS';
         const VISUALCROSSING_BASE_URL = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/';
 
-        // Nominatim Ters Coğrafi Kodlama API URL'si
-        // Nominatim'in kullanım politikasına uygun olarak lütfen kendi e-posta adresinizi 'user-agent' parametresinde belirtin.
-        // Örneğin: 'https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1&accept-language=tr&user-agent=your-email@example.com'
-        const NOMINATIM_BASE_URL = 'https://nominatim.openstreetmap.org/reverse';
+        // OpenCage Geocoding API Anahtarınız
+        // Lütfen buraya kendi OpenCage API anahtarınızı ekleyin.
+        // OpenCage web sitesinden (https://opencagedata.com/) ücretsiz bir anahtar alabilirsiniz.
+        const OPENCAGE_API_KEY = '4ef25e885d8443b79d4eaaf6fa99f942'; // Kendi API anahtarınızı buraya yapıştırın
+        const OPENCAGE_BASE_URL = 'https://api.opencagedata.com/geocode/v1/json';
 
         const weatherIconElem = document.getElementById('weatherIcon');
         const weatherTempElem = document.getElementById('weatherTemp');
@@ -629,7 +630,7 @@
         }
 
         // Hava Durumu Verisi Çekme
-        async function getWeatherData(locationName, lat, lon, actualDistrictNameFromNominatim) {
+        async function getWeatherData(locationName, lat, lon, actualDistrictName) {
             errorMessageElem.textContent = ''; // Önceki hataları temizle
             errorMessageElem.style.display = 'none'; // Hata mesajını başlangıçta gizle
 
@@ -651,7 +652,7 @@
                 }
                 const data = await response.json();
                 console.log('Visual Crossing API Response:', data); // API yanıtını konsola yazdır
-                displayWeatherData(data, actualDistrictNameFromNominatim); // Nominatim'den gelen ilçe adını da gönder
+                displayWeatherData(data, actualDistrictName); // OpenCage'den gelen ilçe adını da gönder
             } catch (error) {
                 errorMessageElem.textContent = `Hava durumu hatası: ${error.message}`;
                 errorMessageElem.style.display = 'block'; // Hata olduğunda göster
@@ -660,7 +661,7 @@
         }
 
         // Hava Durumu Verisini Ekrana Basma
-        function displayWeatherData(data, actualDistrictNameFromNominatim) {
+        function displayWeatherData(data, actualDistrictName) {
             // Tüm hava durumu bilgi elementlerini varsayılan olarak gizle
             weatherTempElem.style.display = 'none';
             weatherHumidityElem.style.display = 'none';
@@ -674,11 +675,11 @@
                 weatherTempElem.textContent = `${Math.round(current.temp)}°C`;
                 weatherHumidityElem.textContent = `Nem: ${Math.round(current.humidity)}%`;
 
-                // Nominatim'den gelen ilçe adını öncelikli olarak kullan
-                if (actualDistrictNameFromNominatim) {
-                    weatherCityElem.textContent = actualDistrictNameFromNominatim;
+                // OpenCage'den gelen ilçe adını öncelikli olarak kullan
+                if (actualDistrictName) {
+                    weatherCityElem.textContent = actualDistrictName;
                 } else if (data.resolvedAddress) {
-                    // Eğer Nominatim'den ilçe adı gelmezse, Visual Crossing'in resolvedAddress'inin ilk kısmını kullan
+                    // Eğer OpenCage'den ilçe adı gelmezse, Visual Crossing'in resolvedAddress'inin ilk kısmını kullan
                     weatherCityElem.textContent = data.resolvedAddress.split(',')[0].trim();
                 } else {
                     weatherCityElem.textContent = 'Bilinmeyen Konum';
@@ -730,55 +731,52 @@
             clockDayOfWeekElem.textContent = dayOfWeek;
         }
 
-        // Koordinatlardan ilçe adını al (Nominatim kullanarak)
+        // Koordinatlardan ilçe adını al (OpenCage kullanarak)
         async function getDistrictNameFromCoordinates(lat, lon) {
-            // Nominatim API isteği için URL oluşturma
-            // format=json: JSON formatında yanıt al
-            // lat, lon: Enlem ve boylam
-            // zoom=18: Detay seviyesi (ilçe/kasaba için daha uygun ve daha hassas)
-            // addressdetails=1: Adres bileşenlerini detaylı olarak al
-            // accept-language=tr: Türkçe sonuçları tercih et
-            // user-agent: Nominatim kullanım politikası gereği bir user-agent belirtmek önemlidir.
-            // Örneğin: 'https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=tr&user-agent=my-personal-homepage-app'
-            const nominatimUrl = `${NOMINATIM_BASE_URL}?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=tr&user-agent=my-personal-homepage-app`;
+            if (!OPENCAGE_API_KEY) {
+                errorMessageElem.textContent = 'OpenCage API anahtarı ayarlanmadı. Lütfen kodu güncelleyin.';
+                errorMessageElem.style.display = 'block';
+                console.error('OpenCage API anahtarı ayarlanmadı.');
+                return null;
+            }
+
+            // OpenCage API isteği için URL oluşturma
+            // q: Enlem ve boylam
+            // key: API anahtarınız
+            // language: Türkçe sonuçları tercih et
+            // pretty: Yanıtı daha okunabilir hale getirir (isteğe bağlı)
+            const opencageUrl = `${OPENCAGE_BASE_URL}?q=${lat}+${lon}&key=${OPENCAGE_API_KEY}&language=tr&pretty=1`;
 
             try {
-                const response = await fetch(nominatimUrl);
+                const response = await fetch(opencageUrl);
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.error || 'Coğrafi kodlama bilgileri alınamadı.');
+                    throw new Error(errorData.status.message || 'Coğrafi kodlama bilgileri alınamadı.');
                 }
                 const data = await response.json();
-                console.log('Nominatim API Response:', data);
+                console.log('OpenCage API Response:', data);
 
-                if (data.address) {
-                    const address = data.address;
-                    
-                    // İlçe veya benzeri bir yerleşim yeri adını öncelikli olarak ara
-                    if (address.city_district) return address.city_district; // Büyük şehirlerdeki belirgin ilçeler için (örn: Kadıköy)
-                    if (address.town) return address.town; // Kasaba olarak geçen ilçeler için (örn: Gebze)
-                    if (address.county) return address.county; // Türkiye'deki "ilçe" karşılığı için sıkça kullanılır (örn: Pendik)
-                    if (address.municipality) return address.municipality; // Belediyeler için (bazı yerlerde ilçe yerine geçer)
-                    if (address.district) return address.district; // Genel ilçe terimi
+                if (data.results && data.results.length > 0) {
+                    const components = data.results[0].components;
 
-                    // Eğer daha spesifik bir ilçe bulunamazsa, suburb'a bak, ancak dikkatli ol
-                    // Suburb'u sadece bir mahalle eki içermiyorsa ve şehir veya kasaba adıyla aynı değilse kullan
-                    if (address.suburb && 
-                        !address.suburb.toLowerCase().includes('mah.') && 
-                        !address.suburb.toLowerCase().includes('mahallesi') &&
-                        address.suburb.toLowerCase() !== (address.city ? address.city.toLowerCase() : '') &&
-                        address.suburb.toLowerCase() !== (address.town ? address.town.toLowerCase() : '')
+                    // OpenCage yanıtındaki adres bileşenlerini kontrol ederek ilçe adını al
+                    // Türkiye için 'county' genellikle ilçe anlamına gelir.
+                    if (components.county) return components.county;
+                    if (components.city_district) return components.city_district;
+                    if (components.town) return components.town;
+                    if (components.city) return components.city; // Eğer ilçe bulunamazsa şehri kullan
+
+                    // Daha genel bir düşüş, eğer yukarıdakiler bulunamazsa
+                    if (components.suburb && 
+                        !components.suburb.toLowerCase().includes('mah.') && 
+                        !components.suburb.toLowerCase().includes('mahallesi')
                     ) {
-                        return address.suburb;
+                        return components.suburb;
                     }
-                    
-                    if (address.village) return address.village; // Köy veya küçük yerleşim yeri
+                    if (components.village) return components.village;
 
-                    // Eğer hala bir ilçe bulunamazsa, şehri kullan
-                    if (address.city) return address.city;
-
-                    // Son çare olarak display_name'in ilk kısmını döndür
-                    if (data.display_name) return data.display_name.split(',')[0].trim();
+                    // Son çare olarak formatted adresin ilk kısmını döndür
+                    if (data.results[0].formatted) return data.results[0].formatted.split(',')[0].trim();
                 }
                 return null; // Uygun adres bileşeni bulunamadı
             } catch (error) {
@@ -796,11 +794,11 @@
                     async (position) => {
                         const lat = position.coords.latitude;
                         const lon = position.coords.longitude;
-                        const districtName = await getDistrictNameFromCoordinates(lat, lon); // Nominatim kullanılarak ilçe adı çekilir
+                        const districtName = await getDistrictNameFromCoordinates(lat, lon); // OpenCage kullanılarak ilçe adı çekilir
 
-                        // Hava durumu API'sine Nominatim'den gelen ilçe adını (eğer varsa) gönder
-                        // Visual Crossing'e gönderilecek konum, Nominatim'den gelen ilçe adı veya koordinatlar olacaktır.
-                        // displayWeatherData fonksiyonu Nominatim adını önceliklendirecek.
+                        // Hava durumu API'sine OpenCage'den gelen ilçe adını (eğer varsa) gönder
+                        // Visual Crossing'e gönderilecek konum, OpenCage'den gelen ilçe adı veya koordinatlar olacaktır.
+                        // displayWeatherData fonksiyonu OpenCage adını önceliklendirecek.
                         getWeatherData(districtName || `${lat},${lon}`, lat, lon, districtName);
                     },
                     (error) => {
