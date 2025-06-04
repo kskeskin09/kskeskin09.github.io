@@ -243,8 +243,8 @@
 
         /* Otomatik doldurma arka planını ve metin rengini şeffaf yap */
         .search-input:-webkit-autofill,
-        .search-input:-webkit-autofill:hover, 
-        .search-input:-webkit-autofill:focus, 
+        .search-input:-webkit-autofill:hover,
+        .search-input:-webkit-autofill:focus,
         .search-input:-webkit-autofill:active {
             -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
             background-color: transparent !important;
@@ -486,7 +486,7 @@
     <div class="main-content">
         <h1 class="title">Kerem Şükrü Keskin</h1>
 
-        <form action="https://www.google.com/search" method="get" class="search-form" target="_blank">
+        <form action="https://www.google.com/search" method="get" class="search-form" target="_blank" id="searchForm">
             <input type="text" name="q" id="searchInput" class="search-input" placeholder="Google'da Ara..." autofocus>
             <button type="submit" class="search-button">Ara</button>
         </form>
@@ -548,6 +548,7 @@
         const weatherCityElem = document.getElementById('weatherCity');
         const errorMessageElem = document.getElementById('errorMessage');
         const searchInput = document.getElementById('searchInput');
+        const searchForm = document.getElementById('searchForm'); // Arama formunu seç
 
         // Clock elements
         const clockHourElem = document.getElementById('clockHour');
@@ -709,12 +710,12 @@
             clockHourElem.textContent = hours;
             clockMinuteElem.textContent = minutes;
             clockSecondElem.textContent = seconds;
-            
+
             // Tarih sırasını değiştir: Gün Ay Yıl Haftanın Günü (virgül kaldırıldı)
             clockDayElem.textContent = day;
             clockMonthElem.textContent = month;
             clockYearElem.textContent = year;
-            clockDayOfWeekElem.textContent = dayOfWeek; 
+            clockDayOfWeekElem.textContent = dayOfWeek;
         }
 
 
@@ -748,6 +749,22 @@
             updateClock(); // Saati hemen göster
             setInterval(updateClock, 1000); // Saati her saniye güncelle
             searchInput.focus(); // Arama çubuğuna odaklan
+
+            // Arama çubuğunu sıfırlama işlevi
+            searchForm.addEventListener('submit', (event) => {
+                // Formun varsayılan gönderimini engelle
+                event.preventDefault();
+
+                // Arama URL'sini oluştur
+                const searchQuery = searchInput.value;
+                const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+
+                // Arama çubuğunu sıfırla
+                searchInput.value = '';
+
+                // Yeni sekmede arama yap
+                window.open(searchUrl, '_blank');
+            });
         });
     </script>
 </body>
