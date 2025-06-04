@@ -735,12 +735,12 @@
             // Nominatim API isteği için URL oluşturma
             // format=json: JSON formatında yanıt al
             // lat, lon: Enlem ve boylam
-            // zoom=16: Detay seviyesi (ilçe/kasaba için daha uygun)
+            // zoom=18: Detay seviyesi (ilçe/kasaba için daha uygun ve daha hassas)
             // addressdetails=1: Adres bileşenlerini detaylı olarak al
             // accept-language=tr: Türkçe sonuçları tercih et
             // user-agent: Nominatim kullanım politikası gereği bir user-agent belirtmek önemlidir.
-            // Örneğin: 'https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=16&addressdetails=1&accept-language=tr&user-agent=my-personal-homepage-app'
-            const nominatimUrl = `${NOMINATIM_BASE_URL}?format=json&lat=${lat}&lon=${lon}&zoom=16&addressdetails=1&accept-language=tr&user-agent=my-personal-homepage-app`;
+            // Örneğin: 'https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=tr&user-agent=my-personal-homepage-app'
+            const nominatimUrl = `${NOMINATIM_BASE_URL}?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=tr&user-agent=my-personal-homepage-app`;
 
             try {
                 const response = await fetch(nominatimUrl);
@@ -753,24 +753,31 @@
 
                 if (data.address) {
                     const address = data.address;
+                    
                     // İlçe veya benzeri bir yerleşim yeri adını öncelikli olarak ara
-                    if (address.city_district) return address.city_district; // Büyük şehirlerdeki belirgin ilçeler için
-                    if (address.town) return address.town; // Kasaba olarak geçen ilçeler için
+                    if (address.city_district) return address.city_district; // Büyük şehirlerdeki belirgin ilçeler için (örn: Kadıköy)
+                    if (address.town) return address.town; // Kasaba olarak geçen ilçeler için (örn: Gebze)
+                    if (address.county) return address.county; // Türkiye'deki "ilçe" karşılığı için sıkça kullanılır (örn: Pendik)
                     if (address.municipality) return address.municipality; // Belediyeler için (bazı yerlerde ilçe yerine geçer)
                     if (address.district) return address.district; // Genel ilçe terimi
-                    if (address.village) return address.village; // Köy veya küçük yerleşim yeri
 
                     // Eğer daha spesifik bir ilçe bulunamazsa, suburb'a bak, ancak dikkatli ol
-                    if (address.suburb) {
-                        // Eğer suburb, "Merkez" gibi genel bir ifade değilse ve şehir ile aynı değilse
-                        if (!['Center', 'Merkez', 'center'].includes(address.suburb) && address.suburb !== address.city) {
-                            return address.suburb;
-                        }
+                    // Suburb'u sadece bir mahalle eki içermiyorsa ve şehir veya kasaba adıyla aynı değilse kullan
+                    if (address.suburb && 
+                        !address.suburb.toLowerCase().includes('mah.') && 
+                        !address.suburb.toLowerCase().includes('mahallesi') &&
+                        address.suburb.toLowerCase() !== (address.city ? address.city.toLowerCase() : '') &&
+                        address.suburb.toLowerCase() !== (address.town ? address.town.toLowerCase() : '')
+                    ) {
+                        return address.suburb;
                     }
-                    if (address.city) return address.city; // Şehir adını kullan
-                    if (address.county) return address.county; // Daha az tercih edilen bir düşüş (ilçe/bölge)
+                    
+                    if (address.village) return address.village; // Köy veya küçük yerleşim yeri
 
-                    // Hiçbir uygun bileşen bulunamazsa, display_name'in ilk kısmını döndür
+                    // Eğer hala bir ilçe bulunamazsa, şehri kullan
+                    if (address.city) return address.city;
+
+                    // Son çare olarak display_name'in ilk kısmını döndür
                     if (data.display_name) return data.display_name.split(',')[0].trim();
                 }
                 return null; // Uygun adres bileşeni bulunamadı
@@ -802,9 +809,9 @@
                         getWeatherData('Gebze'); // Varsayılan şehir adı
                     },
                     {
-                        enableHighAccuracy: false,
-                        timeout: 5000,
-                        maximumAge: 0
+                        enableHighAccuracy: true, // Daha yüksek hassasiyet iste
+                        timeout: 10000, // Zaman aşımını artır
+                        maximumAge: 0 // Her zaman yeni konum al
                     }
                 );
             } else {
