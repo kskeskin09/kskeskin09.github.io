@@ -804,6 +804,18 @@
             }
         }
 
+        /**
+         * Verilen metnin basit bir URL olup olmadığını kontrol eder.
+         * Daha kapsamlı URL doğrulaması için daha karmaşık regex gerekebilir.
+         * @param {string} text Kontrol edilecek metin.
+         * @returns {boolean} Metin bir URL'ye benziyorsa true, aksi takdirde false.
+         */
+        function isValidUrl(text) {
+            // Basit bir URL kontrolü: başında http/https, www veya sonunda .com, .org gibi bir domain uzantısı içeriyor mu?
+            const urlRegex = /^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/[a-zA-Z0-9]+\.[^\s]{2,}|[a-zA-Z0-9]+\.[^\s]{2,})$/i;
+            return urlRegex.test(text);
+        }
+
         // Sayfa yüklendiğinde çalışacak fonksiyonlar
         document.addEventListener('DOMContentLoaded', () => {
             getUserLocationWeather(); // Hava durumunu al
@@ -816,15 +828,26 @@
                 // Formun varsayılan gönderimini engelle
                 event.preventDefault();
 
-                // Arama URL'sini oluştur
-                const searchQuery = searchInput.value;
-                const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+                const searchQuery = searchInput.value.trim();
+                let targetUrl = '';
+
+                if (isValidUrl(searchQuery)) {
+                    // Eğer giriş bir URL ise
+                    if (!searchQuery.startsWith('http://') && !searchQuery.startsWith('https://')) {
+                        targetUrl = `https://${searchQuery}`; // Güvenli bağlantı için https ekle
+                    } else {
+                        targetUrl = searchQuery;
+                    }
+                } else {
+                    // Eğer giriş bir URL değilse, Google'da ara
+                    targetUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+                }
 
                 // Arama çubuğunu sıfırla
                 searchInput.value = '';
 
                 // Yeni sekmede arama yap
-                window.open(searchUrl, '_blank');
+                window.open(targetUrl, '_blank');
             });
         });
     </script>
