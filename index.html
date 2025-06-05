@@ -343,79 +343,6 @@
             display: none; /* Varsayılan olarak gizli */
         }
 
-        /* Batarya Widget'ı */
-        .battery-widget {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            /* Arka plan ve kenarlık kaldırıldı */
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: inherit; /* Tema rengini miras al */
-            transition: color 0.5s ease; /* Tema geçişi için renk geçişi */
-            cursor: default; /* İmleç varsayılan olsun */
-            position: relative; /* Tooltip için */
-        }
-
-        /* Koyu temada batarya widget'ı beyaz olsun */
-        body.dark-theme .battery-widget {
-            color: #f0f0f0;
-        }
-
-        .battery-icon-container {
-            position: relative;
-            width: 30px; /* Batarya ikonunun genişliği */
-            height: 30px; /* Batarya ikonunun yüksekliği */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .battery-icon {
-            font-size: 1.8em; /* Batarya ikonunun boyutu */
-            /* Renk doğrudan JS'den yönetilecek */
-        }
-
-        .battery-level-text {
-            position: absolute;
-            font-size: 0.7em; /* Yüzde metni boyutu */
-            font-weight: 600;
-            color: inherit; /* Tema rengini miras al */
-            text-shadow: 0 0 2px rgba(0, 0, 0, 0.2); /* Okunurluk için gölge */
-        }
-
-        .battery-charging-icon {
-            position: absolute;
-            font-size: 0.8em; /* Elektrik ikonu boyutu */
-            color: #4CAF50; /* Yeşil renk */
-            text-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
-            display: none; /* Varsayılan olarak gizli */
-        }
-
-        /* Tooltip stili */
-        .battery-tooltip {
-            position: absolute;
-            bottom: calc(100% + 10px); /* Batarya widget'ının üzerinde */
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 0.8em;
-            white-space: nowrap; /* Metnin tek satırda kalmasını sağlar */
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            z-index: 10; /* Diğer elementlerin üzerinde */
-        }
-
-        .battery-widget:hover .battery-tooltip {
-            opacity: 1;
-            visibility: visible;
-        }
-
         /* Responsive Ayarlar */
         @media (max-width: 768px) {
             body {
@@ -479,25 +406,6 @@
             }
             .quick-link-item i.fas {
                 font-size: 24px; /* Font Awesome ikonları için responsive boyut */
-            }
-
-            .battery-widget {
-                bottom: 10px;
-                left: 10px;
-                /* padding kaldırıldı */
-            }
-            .battery-icon {
-                font-size: 1.5em;
-            }
-            .battery-level-text {
-                font-size: 0.6em;
-            }
-            .battery-charging-icon {
-                font-size: 0.7em;
-            }
-            .battery-tooltip {
-                font-size: 0.7em;
-                bottom: calc(100% + 8px);
             }
         }
 
@@ -568,25 +476,6 @@
             .quick-link-item i.fas {
                 font-size: 20px; /* Font Awesome ikonları için responsive boyut */
             }
-
-            .battery-widget {
-                bottom: 10px;
-                left: 10px;
-                /* padding kaldırıldı */
-            }
-            .battery-icon {
-                font-size: 1.3em;
-            }
-            .battery-level-text {
-                font-size: 0.55em;
-            }
-            .battery-charging-icon {
-                font-size: 0.6em;
-            }
-            .battery-tooltip {
-                font-size: 0.65em;
-                bottom: calc(100% + 6px);
-            }
         }
     </style>
 </head>
@@ -605,10 +494,15 @@
         </form>
 
         <div class="quick-links">
-            <!-- Gmail simgesi YouTube'un önüne eklendi -->
+            <!-- Gmail simgesi -->
             <a href="https://mail.google.com/" target="_blank" class="quick-link-item">
                 <i class="fas fa-envelope"></i>
             </a>
+            <!-- Google Maps simgesi güncellendi -->
+            <a href="https://maps.google.com/" target="_blank" class="quick-link-item">
+                <i class="fas fa-location-dot"></i>
+            </a>
+            <!-- YouTube simgesi -->
             <a href="https://youtube.com" target="_blank" class="quick-link-item">
                 <svg viewBox="0 0 24 24" fill="currentColor" class="icon">
                     <path d="M21.54 6.54a3.1 3.1 0 0 0-2.19-2.19C17.82 4 12 4 12 4s-5.82 0-7.35.35a3.1 3.1 0 0 0-2.19 2.19C2 8.18 2 12 2 12s0 3.82.35 5.35a3.1 3.1 0 0 0 2.19 2.19C6.18 20 12 20 12 20s5.82 0 7.35-.35a3.1 3.1 0 0 0 2.19-2.19C22 15.82 22 12 22 12s0-3.82-.35-5.35zM10 15.5v-7l6 3.5-6 3.5z"/>
@@ -619,7 +513,7 @@
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.5 13.5h-7V8.5h7v7zM10 10.5v3h4v-3h-4z"/>
                 </svg>
             </a>
-            <!-- Gemini simgesi ChatGPT'nin yanına eklendi -->
+            <!-- Gemini simgesi -->
             <a href="https://gemini.google.com/" target="_blank" class="quick-link-item">
                 <!-- Soyut Gemini benzeri simge: İki hafif üst üste binen kare -->
                 <svg viewBox="0 0 24 24" fill="currentColor" class="icon">
@@ -646,15 +540,6 @@
         <div class="date-display">
             <span id="clockDay" class="date-part day"></span> <span id="clockMonth" class="date-part month"></span> <span id="clockYear" class="date-part year"></span> <span id="clockDayOfWeek" class="date-part day-of-week"></span>
         </div>
-    </div>
-
-    <div class="battery-widget" id="batteryWidget">
-        <div class="battery-icon-container">
-            <i id="batteryIcon" class="battery-icon fas"></i>
-            <span id="batteryLevelText" class="battery-level-text"></span>
-            <i id="batteryChargingIcon" class="battery-charging-icon fas fa-bolt"></i>
-        </div>
-        <div id="batteryTooltip" class="battery-tooltip"></div>
     </div>
 
     <p id="errorMessage" class="error-message"></p>
@@ -685,14 +570,6 @@
         const clockDayElem = document.getElementById('clockDay');
         const clockMonthElem = document.getElementById('clockMonth');
         const clockYearElem = document.getElementById('clockYear');
-
-        // Battery elements
-        const batteryWidget = document.getElementById('batteryWidget');
-        const batteryIconElem = document.getElementById('batteryIcon');
-        const batteryLevelTextElem = document.getElementById('batteryLevelText');
-        const batteryChargingIconElem = document.getElementById('batteryChargingIcon');
-        const batteryTooltipElem = document.getElementById('batteryTooltip');
-
 
         // Tema Algılama ve Uygulama
         function applyTheme(isDark) {
@@ -927,72 +804,6 @@
             }
         }
 
-        // Batarya Durumu Fonksiyonu
-        function updateBatteryStatus(battery) {
-            const level = Math.round(battery.level * 100);
-            batteryLevelTextElem.textContent = `${level}`; // Yüzdelik sembolü kaldırıldı
-
-            // Batarya ikonunu seviyeye göre ayarla
-            // Font Awesome ikonları ve renkleri
-            if (level <= 10) {
-                batteryIconElem.className = 'battery-icon fas fa-battery-empty';
-                batteryIconElem.style.color = '#e74c3c'; // Kırmızı
-            } else if (level <= 35) {
-                batteryIconElem.className = 'battery-icon fas fa-battery-quarter';
-                batteryIconElem.style.color = 'orange'; // Turuncu
-            } else if (level <= 65) {
-                batteryIconElem.className = 'battery-icon fas fa-battery-half';
-                batteryIconElem.style.color = '#f39c12'; // Sarımsı turuncu
-            } else if (level <= 90) {
-                batteryIconElem.className = 'battery-icon fas fa-battery-three-quarters';
-                batteryIconElem.style.color = '#2ecc71'; // Yeşil
-            } else {
-                batteryIconElem.className = 'battery-icon fas fa-battery-full';
-                batteryIconElem.style.color = '#27ae60'; // Koyu yeşil
-            }
-
-            // Şarj ikonunu göster/gizle
-            if (battery.charging) {
-                batteryChargingIconElem.style.display = 'block';
-            } else {
-                batteryChargingIconElem.style.display = 'none';
-            }
-
-            // Tooltip içeriğini güncelle
-            let tooltipText = `Pil: %${level}`; // Tooltip'te yüzde sembolü eklendi
-            if (battery.charging) {
-                if (battery.chargingTime === Infinity) {
-                    tooltipText += ' (Şarj oluyor, tam dolma süresi bilinmiyor)';
-                } else {
-                    const timeToFull = formatTime(battery.chargingTime);
-                    tooltipText += ` (Tahmini dolma süresi: ${timeToFull})`;
-                }
-            } else {
-                if (battery.dischargingTime === Infinity) {
-                    tooltipText += ' (Şarjda değil, kalan süre bilinmiyor)';
-                } else {
-                    const timeToEmpty = formatTime(battery.dischargingTime);
-                    tooltipText += ` (Tahmini kalan süre: ${timeToEmpty})`;
-                }
-            }
-            batteryTooltipElem.textContent = tooltipText;
-        }
-
-        // Saniyeleri okunabilir zaman formatına çevirme
-        function formatTime(seconds) {
-            if (seconds < 60) {
-                return `${Math.round(seconds)} saniye`;
-            }
-            const minutes = Math.round(seconds / 60);
-            if (minutes < 60) {
-                return `${minutes} dakika`;
-            }
-            const hours = Math.floor(minutes / 60);
-            const remainingMinutes = minutes % 60;
-            return `${hours} saat ${remainingMinutes} dakika`;
-        }
-
-
         // Sayfa yüklendiğinde çalışacak fonksiyonlar
         document.addEventListener('DOMContentLoaded', () => {
             getUserLocationWeather(); // Hava durumunu al
@@ -1015,22 +826,6 @@
                 // Yeni sekmede arama yap
                 window.open(searchUrl, '_blank');
             });
-
-            // Batarya durumunu al ve dinleyicileri ayarla
-            if ('getBattery' in navigator) {
-                navigator.getBattery().then(battery => {
-                    updateBatteryStatus(battery);
-
-                    // Pil durumu değişikliklerini dinle
-                    battery.addEventListener('levelchange', () => updateBatteryStatus(battery));
-                    battery.addEventListener('chargingchange', () => updateBatteryStatus(battery));
-                    battery.addEventListener('chargingtimechange', () => updateBatteryStatus(battery));
-                    battery.addEventListener('dischargingtimechange', () => updateBatteryStatus(battery));
-                });
-            } else {
-                console.warn('Tarayıcı Batarya Durumu API\'sini desteklemiyor.');
-                batteryWidget.style.display = 'none'; // Widget'ı gizle
-            }
         });
     </script>
 </body>
