@@ -8,22 +8,22 @@
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* Genel Sıfırlamalar ve Temel Stiller */
+        /* General Resets and Basic Styles */
         body {
             font-family: 'Inter', sans-serif;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* İçeriği dikeyde ortala */
-            align-items: center; /* İçeriği yatayda ortala */
+            justify-content: center; /* Center content vertically */
+            align-items: center; /* Center content horizontally */
             min-height: 100vh;
             margin: 0;
-            overflow: hidden; /* Bulanık ışıkların taşmasını engelle */
-            position: relative; /* Bulanık ışıklar için */
-            transition: background-color 0.5s ease; /* Tema geçişi için */
-            color: #333; /* Açık tema varsayılan metin rengi */
+            overflow: hidden; /* Prevent blob overflow */
+            position: relative; /* For blobs */
+            transition: background-color 0.5s ease; /* For theme transition */
+            color: #333; /* Default text color for light theme */
         }
 
-        /* Tema Tabanlı Arka Plan Renkleri */
+        /* Theme-Based Background Colors */
         body.light-theme {
             background-color: #ffffff;
             color: #333;
@@ -34,27 +34,27 @@
             color: #f0f0f0;
         }
 
-        /* Bulanık Işıklar (Blobs) */
+        /* Blurry Lights (Blobs) */
         .blob {
             position: absolute;
             border-radius: 50%;
-            filter: blur(80px); /* Bulanıklık efekti */
+            filter: blur(80px); /* Blur effect */
             opacity: 0.6;
             animation: blob-move 20s infinite alternate ease-in-out;
-            z-index: -1; /* İçeriğin arkasında kalması için */
+            z-index: -1; /* To stay behind content */
         }
 
-        /* Açık Tema Işık Renkleri */
+        /* Light Theme Blob Colors */
         body.light-theme .blob {
-            background-color: rgba(173, 216, 230, 0.7); /* Açık mavi */
+            background-color: rgba(173, 216, 230, 0.7); /* Light blue */
         }
 
-        /* Koyu Tema Işık Renkleri */
+        /* Dark Theme Blob Colors */
         body.dark-theme .blob {
-            background-color: rgba(65, 105, 225, 0.7); /* Koyu mavi (lacivert değil) */
+            background-color: rgba(65, 105, 225, 0.7); /* Dark blue */
         }
 
-        /* Blob Boyutları ve Konumları */
+        /* Blob Sizes and Positions */
         .blob:nth-child(1) {
             width: 300px;
             height: 300px;
@@ -87,7 +87,7 @@
             animation-delay: 15s;
         }
 
-        /* Blob Animasyonu */
+        /* Blob Animation */
         @keyframes blob-move {
             0% {
                 transform: translate(0, 0) scale(1);
@@ -106,43 +106,43 @@
             }
         }
 
-        /* Ana İçerik Konteyneri */
+        /* Main Content Container */
         .main-content {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 1; /* İçeriğin bulanık ışıkların üzerinde kalması için */
+            z-index: 1; /* To stay above blobs */
             width: 100%;
             max-width: 900px;
             padding: 20px;
             box-sizing: border-box;
         }
 
-        /* Başlık */
+        /* Title */
         .title {
             text-align: center;
             font-size: 2.5em;
             font-weight: 700;
-            color: inherit; /* Tema rengini miras al */
+            color: inherit; /* Inherit theme color */
             transition: color 0.5s ease;
-            z-index: 2; /* Diğer elementlerin üzerinde kalması için */
-            margin-bottom: 40px; /* Arama kutusuyla arasındaki boşluk */
+            z-index: 2; /* To stay above other elements */
+            margin-bottom: 40px; /* Space from search box */
         }
 
-        /* Hava Durumu Widget'ı */
+        /* Weather Widget */
         .weather-widget {
             position: absolute;
             top: 20px;
             left: 20px;
-            background-color: rgba(255, 255, 255, 0.1); /* Hafif şeffaf arka plan */
-            backdrop-filter: blur(10px); /* Arka planı bulanıklaştır */
+            background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent background */
+            backdrop-filter: blur(10px); /* Blur background */
             border-radius: 12px;
             padding: 15px 20px;
             display: flex;
             align-items: center;
             gap: 10px;
-            color: inherit; /* Tema rengini miras al */
+            color: inherit; /* Inherit theme color */
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             transition: background-color 0.5s ease, color 0.5s ease;
         }
@@ -152,11 +152,11 @@
         }
 
         .weather-icon {
-            font-size: 2.5em; /* Font Awesome ikon boyutu */
-            color: inherit; /* Temaya göre renk alsın */
-            display: block; /* İkonu tekrar göster */
-            width: 50px; /* Kutuyla aynı boyutta olması için */
-            text-align: center; /* İkonu ortala */
+            font-size: 2.5em; /* Font Awesome icon size */
+            color: inherit; /* Get color based on theme */
+            display: block; /* Show icon again */
+            width: 50px; /* To be same size as box */
+            text-align: center; /* Center icon */
         }
 
         .weather-info {
@@ -170,25 +170,25 @@
             font-weight: 600;
         }
 
-        /* Nem ve Konum için aynı punto */
+        /* Same font size for humidity and location */
         .weather-info .info-text {
             font-size: 0.9em;
-            margin-top: 2px; /* Elemanlar arası biraz boşluk */
+            margin-top: 2px; /* Small space between elements */
         }
 
-        /* Saat Widget'ı */
+        /* Clock Widget */
         .clock-widget {
             position: absolute;
             top: 20px;
-            right: 20px; /* Sağa hizala */
+            right: 20px; /* Align right */
             background-color: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 15px 20px;
             display: flex;
-            flex-direction: column; /* Dikey sıralama */
-            align-items: flex-end; /* İçeriği sağ tarafa hizala */
-            gap: 5px; /* Elemanlar arası boşluk */
+            flex-direction: column; /* Vertical arrangement */
+            align-items: flex-end; /* Align content to the right */
+            gap: 5px; /* Space between elements */
             color: inherit;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             transition: background-color 0.5s ease, color 0.5s ease;
@@ -199,27 +199,27 @@
         }
 
         .clock-widget .time-display {
-            font-size: 1.8em; /* Saatin ana boyutu */
+            font-size: 1.8em; /* Main clock size */
             font-weight: 600;
             display: flex;
-            gap: 2px; /* Saat, dakika, saniye arası boşluk */
-            font-variant-numeric: tabular-nums; /* Sayıların sabit genişlikte olmasını sağlar */
-            text-align: right; /* Saati sağa hizala */
+            gap: 2px; /* Space between hour, minute, second */
+            font-variant-numeric: tabular-nums; /* Ensures numbers have fixed width */
+            text-align: right; /* Align clock to the right */
         }
 
         .clock-widget .date-display {
-            font-size: 0.9em; /* Tarih bilgisi boyutu */
-            text-align: right; /* Tarihi sağa hizala */
+            font-size: 0.9em; /* Date info size */
+            text-align: right; /* Align date to the right */
         }
 
-        /* Arama Çubuğu */
+        /* Search Bar */
         .search-form {
             display: flex;
             width: 100%;
-            max-width: 600px; /* Chrome'a benzer boyut */
-            background-color: rgba(255, 255, 255, 0.15); /* Hafif şeffaf */
+            max-width: 600px; /* Chrome-like size */
+            background-color: rgba(255, 255, 255, 0.15); /* Slightly transparent */
             backdrop-filter: blur(10px);
-            border-radius: 30px; /* Yuvarlak köşeler */
+            border-radius: 30px; /* Rounded corners */
             padding: 8px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             transition: background-color 0.5s ease, box-shadow 0.3s ease;
@@ -240,25 +240,25 @@
             background: transparent;
             padding: 10px 20px;
             font-size: 1.1em;
-            color: inherit; /* Tema rengini miras al */
+            color: inherit; /* Inherit theme color */
         }
 
-        /* Otomatik doldurma arka planını ve metin rengini şeffaf yap */
+        /* Make autofill background and text color transparent */
         .search-input:-webkit-autofill,
         .search-input:-webkit-autofill:hover,
         .search-input:-webkit-autofill:focus,
         .search-input:-webkit-autofill:active {
             -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
             background-color: transparent !important;
-            color: inherit !important; /* Metin rengini temaya uygun tut */
-            -webkit-text-fill-color: inherit !important; /* Webkit tabanlı tarayıcılar için metin rengini koru */
-            font-size: inherit !important; /* Puntoyu koru */
-            transition: background-color 5000s ease-in-out 0s; /* Geçişi yavaşlatarak görünmez yap */
+            color: inherit !important; /* Preserve text color based on theme */
+            -webkit-text-fill-color: inherit !important; /* Preserve text color for Webkit browsers */
+            font-size: inherit !important; /* Preserve font size */
+            transition: background-color 5000s ease-in-out 0s; /* Slow transition to make it invisible */
         }
 
 
         .search-input::placeholder {
-            color: rgba(255, 255, 255, 0.7); /* Koyu temada daha görünür */
+            color: rgba(255, 255, 255, 0.7); /* More visible in dark theme */
         }
 
         body.light-theme .search-input::placeholder {
@@ -266,7 +266,7 @@
         }
 
         .search-button {
-            background-color: #4285f4; /* Google mavisi */
+            background-color: #4285f4; /* Google blue */
             color: white;
             border: none;
             border-radius: 25px;
@@ -280,13 +280,13 @@
             background-color: #357ae8;
         }
 
-        /* Hızlı Erişim Linkleri */
+        /* Quick Access Links */
         .quick-links {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 12px; /* Boşluğu azaltıldı */
-            margin-top: 25px; /* Arama kutusuyla arasındaki mesafe azaltıldı */
+            gap: 12px; /* Reduced gap */
+            margin-top: 25px; /* Reduced distance from search box */
             width: 100%;
             max-width: 600px;
         }
@@ -294,12 +294,12 @@
         .quick-link-item {
             background-color: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(8px);
-            border-radius: 50%; /* Yuvarlak yap */
-            width: 50px; /* Sabit genişlik, küçültüldü */
-            height: 50px; /* Sabit yükseklik, küçültüldü */
-            display: flex; /* İçeriği ortalamak için flexbox kullan */
-            justify-content: center; /* Yatayda ortala */
-            align-items: center; /* Dikeyde ortala */
+            border-radius: 50%; /* Make it round */
+            width: 50px; /* Fixed width, reduced */
+            height: 50px; /* Fixed height, reduced */
+            display: flex; /* Use flexbox to center content */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
             text-decoration: none;
             color: inherit;
             font-weight: 600;
@@ -321,29 +321,29 @@
             background-color: rgba(0, 0, 0, 0.4);
         }
 
-        /* SVG ikonları için stil */
+        /* Style for SVG icons */
         .quick-link-item .icon {
-            width: 60%; /* SVG ikonun boyutunu kapsayıcıya göre ayarla */
+            width: 60%; /* Adjust SVG icon size relative to container */
             height: 60%;
-            color: inherit; /* Temaya göre renk alsın */
+            color: inherit; /* Get color based on theme */
         }
 
-        /* Font Awesome ikonları için stil */
+        /* Style for Font Awesome icons */
         .quick-link-item i.fas {
-            font-size: 26px; /* Font Awesome ikonları için daha dengeli boyut */
-            color: inherit; /* Temaya göre renk alsın */
+            font-size: 26px; /* More balanced size for Font Awesome icons */
+            color: inherit; /* Get color based on theme */
         }
 
-        /* Hata Mesajı */
+        /* Error Message */
         .error-message {
             color: #e74c3c;
             margin-top: 15px;
             font-weight: 600;
             text-align: center;
-            display: none; /* Varsayılan olarak gizli */
+            display: none; /* Hidden by default */
         }
 
-        /* Responsive Ayarlar */
+        /* Responsive Settings */
         @media (max-width: 768px) {
             body {
                 padding-top: 0;
@@ -399,13 +399,13 @@
                 width: 45px;
                 height: 45px;
             }
-            /* Responsive'de ikon boyutunu ayarla */
+            /* Adjust icon size for responsiveness */
             .quick-link-item .icon {
-                width: 65%; /* SVG ikonlar için responsive boyut */
+                width: 65%; /* Responsive size for SVG icons */
                 height: 65%;
             }
             .quick-link-item i.fas {
-                font-size: 24px; /* Font Awesome ikonları için responsive boyut */
+                font-size: 24px; /* Responsive size for Font Awesome icons */
             }
         }
 
@@ -468,13 +468,13 @@
                 width: 40px;
                 height: 40px;
             }
-            /* Responsive'de ikon boyutunu ayarla */
+            /* Adjust icon size for responsiveness */
             .quick-link-item .icon {
-                width: 60%; /* SVG ikonlar için responsive boyut */
+                width: 60%; /* Responsive size for SVG icons */
                 height: 60%;
             }
             .quick-link-item i.fas {
-                font-size: 20px; /* Font Awesome ikonları için responsive boyut */
+                font-size: 20px; /* Responsive size for Font Awesome icons */
             }
         }
     </style>
@@ -488,34 +488,34 @@
     <div class="main-content">
         <h1 class="title">Kerem Şükrü Keskin</h1>
 
-        <form action="https://www.google.com/search" method="get" class="search-form" target="_blank" id="searchForm">
+        <form action="https://www.google.com/search" method="get" class="search-form" id="searchForm">
             <input type="text" name="q" id="searchInput" class="search-input" placeholder="Google'da Ara..." autofocus>
             <button type="submit" class="search-button">Ara</button>
         </form>
 
         <div class="quick-links">
             <!-- Gmail simgesi -->
-            <a href="https://mail.google.com/" target="_blank" class="quick-link-item">
+            <a href="https://mail.google.com/" class="quick-link-item">
                 <i class="fas fa-envelope"></i>
             </a>
             <!-- Google Maps simgesi -->
-            <a href="https://maps.google.com/" target="_blank" class="quick-link-item">
+            <a href="https://maps.google.com/" class="quick-link-item">
                 <i class="fas fa-location-dot"></i>
             </a>
             <!-- YouTube simgesi -->
-            <a href="https://youtube.com" target="_blank" class="quick-link-item">
+            <a href="https://youtube.com" class="quick-link-item">
                 <svg viewBox="0 0 24 24" fill="currentColor" class="icon">
                     <path d="M21.54 6.54a3.1 3.1 0 0 0-2.19-2.19C17.82 4 12 4 12 4s-5.82 0-7.35.35a3.1 3.1 0 0 0-2.19 2.19C2 8.18 2 12 2 12s0 3.82.35 5.35a3.1 3.1 0 0 0 2.19 2.19C6.18 20 12 20 12 20s5.82 0 7.35-.35a3.1 3.1 0 0 0 2.19-2.19C22 15.82 22 12 22 12s0-3.82-.35-5.35zM10 15.5v-7l6 3.5-6 3.5z"/>
                 </svg>
             </a>
-            <a href="https://chat.openai.com/" target="_blank" class="quick-link-item">
+            <a href="https://chat.openai.com/" class="quick-link-item">
                 <svg viewBox="0 0 24 24" fill="currentColor" class="icon">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.5 13.5h-7V8.5h7v7zM10 10.5v3h4v-3h-4z"/>
                 </svg>
             </a>
             <!-- Gemini simgesi -->
-            <a href="https://gemini.google.com/" target="_blank" class="quick-link-item">
-                <!-- Soyut Gemini benzeri simge: İki hafif üst üste binen kare -->
+            <a href="https://gemini.google.com/" class="quick-link-item">
+                <!-- Abstract Gemini-like icon: Two slightly overlapping squares -->
                 <svg viewBox="0 0 24 24" fill="currentColor" class="icon">
                     <rect x="3" y="3" width="12" height="12" rx="2" ry="2"/>
                     <rect x="9" y="9" width="12" height="12" rx="2" ry="2"/>
@@ -545,13 +545,13 @@
     <p id="errorMessage" class="error-message"></p>
 
     <script>
-        // Visual Crossing API Anahtarınız
+        // Your Visual Crossing API Key
         const VISUALCROSSING_API_KEY = 'N7JPMD9V7XRM6PQY7R7TJWZTS';
         const VISUALCROSSING_BASE_URL = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/';
 
-        // Nominatim Ters Coğrafi Kodlama API URL'si
-        // Nominatim'in kullanım politikasına uygun olarak lütfen kendi e-posta adresinizi 'user-agent' parametresinde belirtin.
-        // Örneğin: 'https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1&accept-language=tr&user-agent=your-email@example.com'
+        // Nominatim Reverse Geocoding API URL
+        // In accordance with Nominatim's usage policy, please specify your own email address in the 'user-agent' parameter.
+        // Example: 'https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1&accept-language=tr&user-agent=your-email@example.com'
         const NOMINATIM_BASE_URL = 'https://nominatim.openstreetmap.org/reverse';
 
         const weatherIconElem = document.getElementById('weatherIcon');
@@ -560,7 +560,7 @@
         const weatherCityElem = document.getElementById('weatherCity');
         const errorMessageElem = document.getElementById('errorMessage');
         const searchInput = document.getElementById('searchInput');
-        const searchForm = document.getElementById('searchForm'); // Arama formunu seç
+        const searchForm = document.getElementById('searchForm'); // Select the search form
 
         // Clock elements
         const clockHourElem = document.getElementById('clockHour');
@@ -571,7 +571,7 @@
         const clockMonthElem = document.getElementById('clockMonth');
         const clockYearElem = document.getElementById('clockYear');
 
-        // Tema Algılama ve Uygulama
+        // Theme Detection and Application
         function applyTheme(isDark) {
             const body = document.body;
             if (isDark) {
@@ -583,16 +583,16 @@
             }
         }
 
-        // Cihazın tema tercihini kontrol et
+        // Check device's theme preference
         const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
         applyTheme(prefersDarkScheme.matches);
 
-        // Tema tercihi değiştiğinde güncelle
+        // Update when theme preference changes
         prefersDarkScheme.addEventListener('change', (e) => {
             applyTheme(e.matches);
         });
 
-        // Visual Crossing ikon isimlerini Font Awesome sınıflarına eşleme
+        // Map Visual Crossing icon names to Font Awesome classes
         function getFontAwesomeIconClass(vcIconName) {
             switch (vcIconName) {
                 case 'clear-day':
@@ -624,85 +624,85 @@
                 case 'wind':
                     return 'fa-wind';
                 case 'sleet':
-                    return 'fa-cloud-meatball'; // Karışık yağış için
+                    return 'fa-cloud-meatball'; // For mixed precipitation
                 case 'hail':
-                    return 'fa-cloud-showers-heavy'; // Dolu için benzer ikon
+                    return 'fa-cloud-showers-heavy'; // Similar icon for hail
                 default:
-                    return 'fa-question-circle'; // Bilinmeyen ikonlar için
+                    return 'fa-question-circle'; // For unknown icons
             }
         }
 
-        // Hava Durumu Verisi Çekme
-        // locationForWeatherFetch: Hava durumu API'sine gönderilecek konum (koordinat veya il adı)
-        // actualProvinceNameForDisplay: Widget'ta gösterilecek il adı
+        // Fetch Weather Data
+        // locationForWeatherFetch: Location to send to weather API (coordinates or city name)
+        // actualProvinceNameForDisplay: Province name to display in the widget
         async function getWeatherData(locationForWeatherFetch, actualProvinceNameForDisplay) {
-            errorMessageElem.textContent = ''; // Önceki hataları temizle
-            errorMessageElem.style.display = 'none'; // Hata mesajını başlangıçta gizle
+            errorMessageElem.textContent = ''; // Clear previous errors
+            errorMessageElem.style.display = 'none'; // Hide error message initially
 
-            // Visual Crossing API isteği için URL oluşturma
+            // Create URL for Visual Crossing API request
             const url = `${VISUALCROSSING_BASE_URL}${locationForWeatherFetch}?key=${VISUALCROSSING_API_KEY}&unitGroup=metric&include=current&lang=tr`;
 
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.message || 'Hava durumu bilgileri alınamadı.');
+                    throw new Error(errorData.message || 'Weather information could not be retrieved.');
                 }
                 const data = await response.json();
-                console.log('Visual Crossing API Response:', data); // API yanıtını konsola yazdır
-                displayWeatherData(data, actualProvinceNameForDisplay); // Nominatim'den gelen il adını da gönder
+                console.log('Visual Crossing API Response:', data); // Log API response to console
+                displayWeatherData(data, actualProvinceNameForDisplay); // Pass province name from Nominatim
             } catch (error) {
                 errorMessageElem.textContent = `Hava durumu hatası: ${error.message}`;
-                errorMessageElem.style.display = 'block'; // Hata olduğunda göster
-                console.error('Hava durumu verisi çekilirken hata oluştu:', error);
+                errorMessageElem.style.display = 'block'; // Show on error
+                console.error('Error fetching weather data:', error);
             }
         }
 
-        // Hava Durumu Verisini Ekrana Basma
+        // Display Weather Data on Screen
         function displayWeatherData(data, actualProvinceNameForDisplay) {
-            // Tüm hava durumu bilgi elementlerini varsayılan olarak gizle
+            // Hide all weather info elements by default
             weatherTempElem.style.display = 'none';
             weatherHumidityElem.style.display = 'none';
             weatherCityElem.style.display = 'none';
             weatherIconElem.style.display = 'none';
-            errorMessageElem.textContent = ''; // Önceki hata mesajlarını temizle
-            errorMessageElem.style.display = 'none'; // Başarılı olunca hata mesajını gizle
+            errorMessageElem.textContent = ''; // Clear previous error messages
+            errorMessageElem.style.display = 'none'; // Hide error message on success
 
             if (data.currentConditions) {
                 const current = data.currentConditions;
                 weatherTempElem.textContent = `${Math.round(current.temp)}°C`;
                 weatherHumidityElem.textContent = `Nem: ${Math.round(current.humidity)}%`;
 
-                // Widget'ta gösterilecek konum adı: Nominatim'den gelen il adı öncelikli
+                // Location name to display in the widget: Province name from Nominatim is prioritized
                 if (actualProvinceNameForDisplay) {
                     weatherCityElem.textContent = actualProvinceNameForDisplay;
                 } else if (data.resolvedAddress) {
-                    // Eğer Nominatim'den il adı gelmezse, Visual Crossing'in resolvedAddress'inin ilk kısmını kullan
+                    // If no province name from Nominatim, use the first part of Visual Crossing's resolvedAddress
                     weatherCityElem.textContent = data.resolvedAddress.split(',')[0].trim();
                 } else {
                     weatherCityElem.textContent = 'Bilinmeyen Konum';
                 }
 
-                // Elementleri görünür yap
+                // Make elements visible
                 weatherTempElem.style.display = 'block';
                 weatherHumidityElem.style.display = 'block';
                 weatherCityElem.style.display = 'block';
 
-                // Font Awesome ikon sınıfını ayarla
+                // Set Font Awesome icon class
                 const iconClass = getFontAwesomeIconClass(current.icon);
-                weatherIconElem.className = `weather-icon fas ${iconClass}`; // fas: solid ikonlar için
-                weatherIconElem.style.display = 'block'; // İkonu görünür yap
+                weatherIconElem.className = `weather-icon fas ${iconClass}`; // fas: for solid icons
+                weatherIconElem.style.display = 'block'; // Make icon visible
 
             } else {
-                weatherTempElem.textContent = 'Bilgi yok'; // Veri yoksa "Bilgi yok" göster
-                // Diğer elementlerin textContent'ini ayarlamaya gerek yok, çünkü gizlenecekler
+                weatherTempElem.textContent = 'Bilgi yok'; // Show "No info" if no data
+                // No need to set textContent for other elements, as they will be hidden
                 errorMessageElem.textContent = 'Hava durumu verisi bulunamadı. Lütfen API limitlerinizi veya konumunuzu kontrol edin.';
-                errorMessageElem.style.display = 'block'; // Hata olduğunda göster
-                console.error('Visual Crossing API yanıtında veri bulunamadı veya boş:', data);
+                errorMessageElem.style.display = 'block'; // Show on error
+                console.error('No data found or empty in Visual Crossing API response:', data);
             }
         }
 
-        // Saati Güncelleme Fonksiyonu
+        // Function to Update Clock
         function updateClock() {
             const now = new Date();
 
@@ -722,29 +722,29 @@
             clockMinuteElem.textContent = minutes;
             clockSecondElem.textContent = seconds;
 
-            // Tarih sırasını değiştir: Gün Ay Yıl Haftanın Günü (virgül kaldırıldı)
+            // Change date order: Day Month Year Day of Week (comma removed)
             clockDayElem.textContent = day;
             clockMonthElem.textContent = month;
             clockYearElem.textContent = year;
             clockDayOfWeekElem.textContent = dayOfWeek;
         }
 
-        // Koordinatlardan il adını al (Nominatim kullanarak)
+        // Get province name from coordinates (using Nominatim)
         async function getProvinceNameFromCoordinates(lat, lon) {
-            // Nominatim API isteği için URL oluşturma
-            // format=json: JSON formatında yanıt al
-            // lat, lon: Enlem ve boylam
-            // zoom=10: İl seviyesi için daha uygun bir zoom seviyesi
-            // addressdetails=1: Adres bileşenlerini detaylı olarak al
-            // accept-language=tr: Türkçe sonuçları tercih et
-            // user-agent: Nominatim kullanım politikası gereği bir user-agent belirtmek önemlidir.
+            // Create URL for Nominatim API request
+            // format=json: Get response in JSON format
+            // lat, lon: Latitude and longitude
+            // zoom=10: More appropriate zoom level for province level
+            // addressdetails=1: Get detailed address components
+            // accept-language=tr: Prefer Turkish results
+            // user-agent: It is important to specify a user-agent as per Nominatim's usage policy.
             const nominatimUrl = `${NOMINATIM_BASE_URL}?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1&accept-language=tr&user-agent=my-personal-homepage-app`;
 
             try {
                 const response = await fetch(nominatimUrl);
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.error || 'Coğrafi kodlama bilgileri alınamadı.');
+                    throw new Error(errorData.error || 'Geocoding information could not be retrieved.');
                 }
                 const data = await response.json();
                 console.log('Nominatim API Response:', data);
@@ -752,102 +752,102 @@
                 if (data.address) {
                     const address = data.address;
                     
-                    // İl adını öncelikli olarak ara
-                    if (address.state) return address.state; // Türkiye'de il için kullanılan anahtar
-                    if (address.province) return address.province; // Bazı ülkelerde eyalet/il karşılığı
+                    // Prioritize searching for province name
+                    if (address.state) return address.state; // Key used for province in Turkey
+                    if (address.province) return address.province; // Equivalent to state/province in some countries
 
-                    // Eğer state/province bulunamazsa, city'ye bak (büyükşehirler için il adıyla aynıdır)
+                    // If state/province not found, check city (for metropolitan cities, it's the same as province name)
                     if (address.city) return address.city;
 
-                    // Son çare olarak display_name'in ilk kısmını döndür
+                    // As a last resort, return the first part of display_name
                     if (data.display_name) return data.display_name.split(',')[0].trim();
                 }
-                return null; // Uygun adres bileşeni bulunamadı
+                return null; // No suitable address component found
             } catch (error) {
                 errorMessageElem.textContent = `Konum adı hatası: ${error.message}`;
                 errorMessageElem.style.display = 'block';
-                console.error('Coğrafi kodlama verisi çekilirken hata oluştu:', error);
+                console.error('Error fetching geocoding data:', error);
                 return null;
             }
         }
 
-        // Kullanıcının konumunu al ve hava durumunu göster
+        // Get user's location and display weather
         async function getUserLocationWeather() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     async (position) => {
                         const lat = position.coords.latitude;
                         const lon = position.coords.longitude;
-                        // Hava durumu API'sine gönderilecek konum her zaman koordinatlar olacak
+                        // Location to send to weather API will always be coordinates
                         const locationForWeatherFetch = `${lat},${lon}`; 
                         
-                        // Widget'ta gösterilecek il adını Nominatim'den çek
+                        // Fetch province name to display in the widget from Nominatim
                         const provinceNameForDisplay = await getProvinceNameFromCoordinates(lat, lon); 
 
-                        // Hava durumu verisini koordinatlara göre çek, ancak widget'ta gösterilecek il adını ilet
+                        // Fetch weather data based on coordinates, but pass the province name to display in the widget
                         getWeatherData(locationForWeatherFetch, provinceNameForDisplay);
                     },
                     (error) => {
-                        console.warn('Konum alınamadı, varsayılan şehre geçiliyor:', error);
-                        // Konum izni verilmezse veya hata olursa varsayılan şehri (Kocaeli) kullan
-                        getWeatherData('Kocaeli', 'Kocaeli'); // Hem çekilecek konum hem de gösterilecek konum Kocaeli
+                        console.warn('Location could not be retrieved, switching to default city:', error);
+                        // If location permission is not granted or an error occurs, use default city (Kocaeli)
+                        getWeatherData('Kocaeli', 'Kocaeli'); // Both location to fetch and display will be Kocaeli
                     },
                     {
-                        enableHighAccuracy: true, // Daha yüksek hassasiyet iste
-                        timeout: 10000, // Zaman aşımını artır
-                        maximumAge: 0 // Her zaman yeni konum al
+                        enableHighAccuracy: true, // Request higher accuracy
+                        timeout: 10000, // Increase timeout
+                        maximumAge: 0 // Always get new location
                     }
                 );
             } else {
-                console.warn('Tarayıcı konum servislerini desteklemiyor, varsayılan şehre geçiliyor.');
-                getWeatherData('Kocaeli', 'Kocaeli'); // Geolocation desteklenmiyorsa varsayılan il
+                console.warn('Browser does not support location services, switching to default city.');
+                getWeatherData('Kocaeli', 'Kocaeli'); // Default city if Geolocation is not supported
             }
         }
 
         /**
-         * Verilen metnin basit bir URL olup olmadığını kontrol eder.
-         * Daha kapsamlı URL doğrulaması için daha karmaşık regex gerekebilir.
-         * @param {string} text Kontrol edilecek metin.
-         * @returns {boolean} Metin bir URL'ye benziyorsa true, aksi takdirde false.
+         * Checks if the given text is a simple URL.
+         * More comprehensive URL validation may require a more complex regex.
+         * @param {string} text Text to check.
+         * @returns {boolean} True if the text resembles a URL, otherwise false.
          */
         function isValidUrl(text) {
-            // Basit bir URL kontrolü: başında http/https, www veya sonunda .com, .org gibi bir domain uzantısı içeriyor mu?
+            // Simple URL check: does it contain http/https, www, or a domain extension like .com, .org?
             const urlRegex = /^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/[a-zA-Z0-9]+\.[^\s]{2,}|[a-zA-Z0-9]+\.[^\s]{2,})$/i;
             return urlRegex.test(text);
         }
 
-        // Sayfa yüklendiğinde çalışacak fonksiyonlar
+        // Functions to run when the page loads
         document.addEventListener('DOMContentLoaded', () => {
-            getUserLocationWeather(); // Hava durumunu al
-            updateClock(); // Saati hemen göster
-            setInterval(updateClock, 1000); // Saati her saniye güncelle
-            searchInput.focus(); // Arama çubuğuna odaklan
+            getUserLocationWeather(); // Get weather data
+            updateClock(); // Display clock immediately
+            setInterval(updateClock, 1000); // Update clock every second
+            searchInput.focus(); // Focus on the search bar
 
-            // Arama çubuğunu sıfırlama işlevi
+            // Search bar reset function
             searchForm.addEventListener('submit', (event) => {
-                // Formun varsayılan gönderimini engelle
+                // Prevent default form submission
                 event.preventDefault();
 
                 const searchQuery = searchInput.value.trim();
                 let targetUrl = '';
 
                 if (isValidUrl(searchQuery)) {
-                    // Eğer giriş bir URL ise
+                    // If input is a URL
                     if (!searchQuery.startsWith('http://') && !searchQuery.startsWith('https://')) {
-                        targetUrl = `https://${searchQuery}`; // Güvenli bağlantı için https ekle
+                        targetUrl = `https://${searchQuery}`; // Add https for secure connection
                     } else {
                         targetUrl = searchQuery;
                     }
                 } else {
-                    // Eğer giriş bir URL değilse, Google'da ara
+                    // If input is not a URL, search on Google
                     targetUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
                 }
 
-                // Arama çubuğunu sıfırla
+                // Clear the search bar
                 searchInput.value = '';
 
-                // Yeni sekmede arama yap
-                window.open(targetUrl, '_blank');
+                // Open in the current tab/window (default behavior without _blank)
+                window.open(targetUrl, '_self'); // Explicitly set to _self for clarity
             });
         });
     </script>
