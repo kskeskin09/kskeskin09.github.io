@@ -1,80 +1,274 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>AI Push-Up Counter</title>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
-  <style>
-    body { text-align: center; font-family: sans-serif; }
-    canvas { position: absolute; top: 0; left: 0; }
-    video { transform: scaleX(-1); }
-    #counter { font-size: 48px; margin-top: 20px; }
-  </style>
-</head>
-<body>
-  <h1>Şınav Sayacı (AI)</h1>
-  <video id="video" width="640" height="480" autoplay playsinline muted></video>
-  <canvas id="output" width="640" height="480"></canvas>
-  <div id="counter">Sayı: 0</div>
+import React, { useRef, useEffect, useState, useCallback } from 'react';
+// MediaPipe kütüphaneleri artık CDN üzerinden yükleneceği için import edilmiyor.
+// import { Pose } from '@mediapipe/pose';
+// import { Camera } from '@mediapipe/camera_utils';
 
-  <script>
-    let video = document.getElementById('video');
-    let canvas = document.getElementById('output');
-    let ctx = canvas.getContext('2d');
-    let counter = 0;
-    let goingDown = false;
+function App() {
+    // State değişkenleri
+    const videoRef = useRef(null); // Video elementine referans
+    const canvasRef = useRef(null); // Canvas elementine referans
+    const [pushupCount, setPushupCount] = useState(0); // Şınav sayacı
+    const [poseDetector, setPoseDetector] = useState(null); // Pose modelini tutar
+    const [isDetecting, setIsDetecting] = useState(false); // Tespitin aktif olup olmadığını belirtir
+    const [feedbackMessage, setFeedbackMessage] = useState("Kamera bekleniyor..."); // Kullanıcıya geri bildirim
+    const [pushupState, setPushupState] = useState('up'); // Şınavın 'yukarı' veya 'aşağı' durumu
+    const [lastDetectionTime, setLastDetectionTime] = useState(0); // Son tespit zamanı (debounce için)
+    const DEBOUNCE_TIME = 500; // Milisaniye cinsinden debounce süresi
 
-    async function setupCamera() {
-      video.srcObject = await navigator.mediaDevices.getUserMedia({
-        video: { width: 640, height: 480 },
-        audio: false
-      });
-      return new Promise(resolve => {
-        video.onloadedmetadata = () => { resolve(video); };
-      });
-    }
-
-    async function main() {
-      await setupCamera();
-      video.play();
-
-      const detector = await poseDetection.createDetector(
-        poseDetection.SupportedModels.MoveNet,
-        { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING }
-      );
-
-      async function detect() {
-        const poses = await detector.estimatePoses(video);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        if (poses.length > 0) {
-          const keypoints = poses[0].keypoints;
-
-          const leftShoulder = keypoints.find(p => p.name === 'left_shoulder');
-          const leftHip = keypoints.find(p => p.name === 'left_hip');
-
-          if (leftShoulder && leftHip) {
-            const yDiff = leftShoulder.y - leftHip.y;
-
-            // Kullanıcının aşağı indiğini ve sonra yukarı çıktığını algıla
-            if (yDiff > 30) goingDown = true;
-            if (yDiff < 10 && goingDown) {
-              counter++;
-              goingDown = false;
-              document.getElementById('counter').innerText = `Sayı: ${counter}`;
-            }
-          }
+    // Şınav hareketini algılayan ve sayacı güncelleyen ana mantık
+    const detectPushup = useCallback((landmarks) => {
+        // Gerekli eklemlerin varlığını kontrol et
+        if (!landmarks || landmarks.length === 0) {
+            return;
         }
 
-        requestAnimationFrame(detect);
-      }
+        // Önemli eklemlerin indeksleri (MediaPipe Pose modeline göre)
+        const leftShoulder = landmarks[11];
+        const rightShoulder = landmarks[12];
+        const leftElbow = landmarks[13];
+        const rightElbow = landmarks[14];
+        const leftWrist = landmarks[15];
+        const rightWrist = landmarks[16];
 
-      detect();
-    }
+        // Güvenilirlik skorlarını kontrol et (0.5'ten büyük olmalı)
+        if (
+            leftShoulder.score < 0.5 || rightShoulder.score < 0.5 ||
+            leftElbow.score < 0.5 || rightElbow.score < 0.5 ||
+            leftWrist.score < 0.5 || rightWrist.score < 0.5
+        ) {
+            setFeedbackMessage("Eklemler net değil. Lütfen kameraya doğru durun.");
+            return;
+        }
 
-    main();
-  </script>
-</body>
-</html>
+        // Ortalama omuz ve dirsek Y koordinatları
+        const avgShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
+        const avgElbowY = (leftElbow.y + rightElbow.y) / 2;
+        const avgWristY = (leftWrist.y + rightWrist.y) / 2;
+
+        // Dirsek ve omuz arasındaki dikey mesafeyi hesapla
+        // Bu, dirseklerin ne kadar büküldüğünü gösterir
+        const elbowShoulderDiffY = avgElbowY - avgShoulderY; // Pozitif değer, dirseklerin omuzlardan aşağıda olduğunu gösterir
+
+        // Dirsek ve bilek arasındaki dikey mesafeyi hesapla
+        const elbowWristDiffY = avgWristY - avgElbowY; // Pozitif değer, bileklerin dirseklerden aşağıda olduğunu gösterir
+
+        // Şınavın 'aşağı' pozisyonu için eşikler
+        // Dirsekler omuzların oldukça altında olmalı (dikeyde)
+        // Dirsekler bileklere göre de aşağıda olmalı (kolun büküldüğünü gösterir)
+        const DOWN_THRESHOLD_ELBOW_SHOULDER = 0.2; // Dirseklerin omuzlara göre ne kadar aşağıda olduğu (normalize edilmiş 0-1 aralığında)
+        const DOWN_THRESHOLD_ELBOW_WRIST = 0.05; // Dirseklerin bileklere göre ne kadar aşağıda olduğu
+
+        // Şınavın 'yukarı' pozisyonu için eşikler
+        // Dirsekler omuzlara yakın veya üstünde olmalı (kolun düzleştiğini gösterir)
+        const UP_THRESHOLD_ELBOW_SHOULDER = 0.05; // Dirseklerin omuzlara göre ne kadar yukarıda olduğu
+
+        const currentTime = Date.now();
+
+        // Şınav sayma mantığı
+        if (pushupState === 'up') {
+            // Eğer dirsekler yeterince aşağıdaysa ve debounce süresi geçtiyse 'aşağı' durumuna geç
+            if (
+                elbowShoulderDiffY > DOWN_THRESHOLD_ELBOW_SHOULDER &&
+                elbowWristDiffY > DOWN_THRESHOLD_ELBOW_WRIST &&
+                (currentTime - lastDetectionTime > DEBOUNCE_TIME)
+            ) {
+                setPushupState('down');
+                setFeedbackMessage("Aşağı!");
+                setLastDetectionTime(currentTime);
+            } else {
+                setFeedbackMessage("Yukarı pozisyonda kalın.");
+            }
+        } else if (pushupState === 'down') {
+            // Eğer dirsekler yeterince yukarıdaysa ve debounce süresi geçtiyse 'yukarı' durumuna geç ve sayacı artır
+            if (
+                elbowShoulderDiffY < UP_THRESHOLD_ELBOW_SHOULDER &&
+                (currentTime - lastDetectionTime > DEBOUNCE_TIME)
+            ) {
+                setPushupCount((prevCount) => prevCount + 1);
+                setPushupState('up');
+                setFeedbackMessage("Şınav! Yukarı!");
+                setLastDetectionTime(currentTime);
+            } else {
+                setFeedbackMessage("Aşağı pozisyonda kalın.");
+            }
+        }
+    }, [pushupState, lastDetectionTime]); // Bağımlılıkları ekle
+
+    // Canvas üzerine eklemleri çizen fonksiyon
+    const drawLandmarks = useCallback((landmarks) => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        const video = videoRef.current;
+
+        if (!video || !ctx || !landmarks) return;
+
+        // Canvas'ı temizle
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Canvas boyutlarını video boyutlarına ayarla
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        // Eklemleri çiz
+        ctx.fillStyle = 'red'; // Eklemlerin rengi
+        ctx.strokeStyle = 'blue'; // Bağlantı çizgilerinin rengi
+        ctx.lineWidth = 2;
+
+        // Eklemleri noktalar olarak çiz
+        for (const landmark of landmarks) {
+            ctx.beginPath();
+            ctx.arc(landmark.x * canvas.width, landmark.y * canvas.height, 5, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        // Eklemler arasındaki bağlantıları çiz (basit bir iskelet)
+        const connections = [
+            [11, 13], [13, 15], // Sol kol: Omuz-Dirsek-Bilek
+            [12, 14], [14, 16], // Sağ kol: Omuz-Dirsek-Bilek
+            [11, 12], // Omuzlar arası
+            // İsterseniz daha fazla bağlantı ekleyebilirsiniz (kalça, diz vb.)
+        ];
+
+        for (const connection of connections) {
+            const [p1Index, p2Index] = connection;
+            const p1 = landmarks[p1Index];
+            const p2 = landmarks[p2Index];
+
+            if (p1 && p2 && p1.score > 0.5 && p2.score > 0.5) {
+                ctx.beginPath();
+                ctx.moveTo(p1.x * canvas.width, p1.y * canvas.height);
+                ctx.lineTo(p2.x * canvas.width, p2.y * canvas.height);
+                ctx.stroke();
+            }
+        }
+    }, []);
+
+    // MediaPipe Pose modelini ve kamera akışını başlatma
+    useEffect(() => {
+        // MediaPipe kütüphanelerinin global olarak yüklendiğinden emin olun
+        if (typeof window.Pose === 'undefined' || typeof window.Camera === 'undefined') {
+            setFeedbackMessage("MediaPipe kütüphaneleri yükleniyor... Lütfen bekleyin.");
+            // Gerekirse burada kütüphanelerin yüklenmesini bekleyen bir mekanizma eklenebilir.
+            // Örneğin, document.createElement('script') ile dinamik olarak yükleme.
+            return;
+        }
+
+        const setupPoseDetection = async () => {
+            // Pose modelini oluştur (window.Pose olarak erişiliyor)
+            const pose = new window.Pose({
+                locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+                },
+            });
+
+            pose.setOptions({
+                modelComplexity: 1, // 0, 1 veya 2 (daha yüksek daha doğru ama daha yavaş)
+                smoothLandmarks: true, // Eklemlerin hareketini yumuşatır
+                enableSegmentation: false, // Arka plan segmentasyonunu kapat
+                smoothSegmentation: false, // Segmentasyonu yumuşatmayı kapat
+                minDetectionConfidence: 0.5, // Minimum tespit güvenilirliği
+                minTrackingConfidence: 0.5, // Minimum takip güvenilirliği
+            });
+
+            // Sonuçlar geldiğinde çalışacak fonksiyon
+            pose.onResults((results) => {
+                if (videoRef.current && canvasRef.current) {
+                    const video = videoRef.current;
+                    const canvas = canvasRef.current;
+                    const ctx = canvas.getContext('2d');
+
+                    // Canvas'ı temizle ve video görüntüsünü çiz
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    if (results.poseLandmarks) {
+                        // Eklemleri çiz
+                        drawLandmarks(results.poseLandmarks);
+                        // Şınavı tespit et
+                        detectPushup(results.poseLandmarks);
+                    }
+                }
+            });
+
+            setPoseDetector(pose); // Pose modelini state'e kaydet
+
+            // Kamerayı başlat (window.Camera olarak erişiliyor)
+            if (videoRef.current) {
+                const camera = new window.Camera(videoRef.current, {
+                    onFrame: async () => {
+                        if (pose) {
+                            await pose.send({ image: videoRef.current });
+                        }
+                    },
+                    width: 640,
+                    height: 480,
+                });
+                camera.start(); // Kamera akışını başlat
+                setIsDetecting(true);
+                setFeedbackMessage("Şınav çekmeye başlayın!");
+            }
+        };
+
+        // Kütüphanelerin yüklenmesini beklemek için basit bir kontrol
+        const checkMediaPipeReady = setInterval(() => {
+            if (typeof window.Pose !== 'undefined' && typeof window.Camera !== 'undefined') {
+                clearInterval(checkMediaPipeReady);
+                setupPoseDetection();
+            }
+        }, 100); // Her 100ms'de bir kontrol et
+
+        // Component unmount edildiğinde temizleme
+        return () => {
+            clearInterval(checkMediaPipeReady); // Kontrol interval'ını temizle
+            if (poseDetector) {
+                poseDetector.close(); // Modeli kapat
+            }
+            if (videoRef.current && videoRef.current.srcObject) {
+                videoRef.current.srcObject.getTracks().forEach(track => track.stop()); // Kamera akışını durdur
+            }
+        };
+    }, [drawLandmarks, detectPushup]); // Bağımlılıkları ekle
+
+    // Sıfırlama fonksiyonu
+    const resetCounter = () => {
+        setPushupCount(0);
+        setPushupState('up');
+        setFeedbackMessage("Sayaç sıfırlandı. Tekrar başlayın!");
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-4">
+            <h1 className="text-5xl font-extrabold text-teal-400 mb-8 animate-pulse">
+                AI Egzersiz Sayacı
+            </h1>
+
+            <div className="relative w-full max-w-2xl bg-gray-800 rounded-lg shadow-xl overflow-hidden mb-8">
+                <video ref={videoRef} className="w-full h-auto rounded-lg" autoPlay playsInline muted></video>
+                <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full"></canvas>
+            </div>
+
+            <div className="bg-gray-800 p-6 rounded-lg shadow-xl text-center w-full max-w-md mb-8">
+                <h2 className="text-3xl font-semibold text-gray-200 mb-4">Şınav Sayısı:</h2>
+                <p className="text-6xl font-bold text-green-500 animate-bounce">{pushupCount}</p>
+            </div>
+
+            <div className="bg-gray-800 p-6 rounded-lg shadow-xl text-center w-full max-w-md mb-8">
+                <h2 className="text-2xl font-semibold text-gray-200 mb-4">Geri Bildirim:</h2>
+                <p className="text-xl text-yellow-300">{feedbackMessage}</p>
+            </div>
+
+            <button
+                onClick={resetCounter}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-opacity-50"
+            >
+                Sayacı Sıfırla
+            </button>
+
+            {!isDetecting && (
+                <p className="mt-4 text-gray-400">Kamera izni bekleniyor veya model yükleniyor...</p>
+            )}
+        </div>
+    );
+}
+
+export default App;
