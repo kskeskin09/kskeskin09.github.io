@@ -1,7 +1,9 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 // MediaPipe kütüphaneleri artık CDN üzerinden yükleneceği için import edilmiyor.
-// import { Pose } from '@mediapipe/pose';
-// import { Camera } from '@mediapipe/camera_utils';
+// Bu kütüphanelerin HTML dosyasında <script> etiketleri ile yüklenmesi gerekmektedir.
+// Örneğin, index.html dosyanızın <head> bölümüne şunları ekleyin:
+// <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+// <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 
 function App() {
     // State değişkenleri
@@ -146,14 +148,38 @@ function App() {
     // MediaPipe Pose modelini ve kamera akışını başlatma
     useEffect(() => {
         // MediaPipe kütüphanelerinin global olarak yüklendiğinden emin olun
+        // Bu kontrol, kütüphanelerin HTML'e doğru şekilde eklenip eklenmediğini anlamak için önemlidir.
         if (typeof window.Pose === 'undefined' || typeof window.Camera === 'undefined') {
-            setFeedbackMessage("MediaPipe kütüphaneleri yükleniyor... Lütfen bekleyin.");
-            // Gerekirse burada kütüphanelerin yüklenmesini bekleyen bir mekanizma eklenebilir.
-            // Örneğin, document.createElement('script') ile dinamik olarak yükleme.
+            setFeedbackMessage("MediaPipe kütüphaneleri yükleniyor... Lütfen bekleyin. index.html dosyanızda CDN linklerinin doğru olduğundan emin olun.");
             return;
         }
 
         const setupPoseDetection = async () => {
+            // Kamera akışını doğrudan istemeyi dene
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                    await videoRef.current.play(); // Videoyu oynatmayı bekle
+                }
+            } catch (error) {
+                console.error("Kamera erişim hatası:", error);
+                if (error.name === "NotAllowedError") {
+                    setFeedbackMessage("Kamera erişimi reddedildi. Lütfen tarayıcı ayarlarınızdan izin verin.");
+                } else if (error.name === "NotFoundError" || error.name === "DevicesNotFoundError") {
+                    setFeedbackMessage("Kamera bulunamadı. Lütfen bir kamera takılı olduğundan ve çalışır durumda olduğundan emin olun.");
+                } else if (error.name === "NotReadableError" || error.name === "OverconstrainedError") {
+                    setFeedbackMessage("Kamera kullanılamıyor. Başka bir uygulama kamerayı kullanıyor olabilir veya kamera sorunlu.");
+                } else if (window.location.protocol !== 'https:') {
+                    setFeedbackMessage("Kamera erişimi için HTTPS bağlantısı gereklidir. Lütfen uygulamayı güvenli bir bağlantı üzerinden açın (GitHub Pages HTTPS kullanır).");
+                }
+                else {
+                    setFeedbackMessage(`Kamera hatası: ${error.message}.`);
+                }
+                setIsDetecting(false); // Tespitin başlamadığını belirt
+                return; // Hata durumunda diğer işlemlere devam etme
+            }
+
             // Pose modelini oluştur (window.Pose olarak erişiliyor)
             const pose = new window.Pose({
                 locateFile: (file) => {
@@ -193,6 +219,8 @@ function App() {
             setPoseDetector(pose); // Pose modelini state'e kaydet
 
             // Kamerayı başlat (window.Camera olarak erişiliyor)
+            // Not: Kamera akışı zaten getUserMedia ile başlatıldı,
+            // MediaPipe'ın Camera utility'si sadece onFrame callback'ini yönetir.
             if (videoRef.current) {
                 const camera = new window.Camera(videoRef.current, {
                     onFrame: async () => {
@@ -203,7 +231,7 @@ function App() {
                     width: 640,
                     height: 480,
                 });
-                camera.start(); // Kamera akışını başlat
+                camera.start(); // Kamera akışını MediaPipe için başlat
                 setIsDetecting(true);
                 setFeedbackMessage("Şınav çekmeye başlayın!");
             }
