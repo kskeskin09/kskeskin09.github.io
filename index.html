@@ -4,41 +4,20 @@
     <meta charset="UTF-8">
     <title>Şınav Sayar AI</title>
     <style>
-        body { 
-            font-family: sans-serif; 
-            text-align: center; 
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 20px;
-        }
-        canvas { 
-            border: 2px solid #333;
-            border-radius: 10px;
-            margin-top: 20px;
-            /* Ekran boyutuna göre ayarlanabilirlik için */
-            max-width: 100%;
-            height: auto;
-        }
+        body { font-family: sans-serif; text-align: center; background-color: #f0f0f0; margin: 0; padding: 20px; }
+        canvas { border: 2px solid #333; border-radius: 10px; margin-top: 20px; max-width: 100%; height: auto; }
         h1 { color: #333; }
         h2 { color: #555; font-size: 2em; }
-        
-        /* ÖNEMLİ DEĞİŞİKLİK BURADA */
-        #video {
-            /* display: none; yerine bunu kullanıyoruz */
-            position: absolute; /* Sayfa akışından çıkar */
-            top: -10000px;    /* Ekranın çok uzağına gönder */
-            left: -10000px;   /* Ekranın çok uzağına gönder */
-        }
+        #video { position: absolute; top: -10000px; left: -10000px; }
     </style>
 </head>
 <body>
     <h1>AI Destekli Şınav Sayar</h1>
-    <p>Kamera karşısında şınav çekmeye başlayın. Vücudunuzun yan profilden görünmesi en iyi sonucu verir.</p>
+    <p>Kamera karşısında, ön profilden durarak şınav çekmeye başlayın.</p>
     <canvas id="canvas" width="640" height="480"></canvas>
     <h2>Şınav Sayısı: <span id="pushup-counter">0</span></h2>
     <video id="video" width="640" height="480" autoplay playsinline></video>
 
-    <!-- Gerekli kütüphaneleri ekliyoruz -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
     <script src="app.js"></script>
