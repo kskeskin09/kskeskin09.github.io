@@ -13,7 +13,7 @@ async function init() {
     try {
         const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
         detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig);
-        console.log("✅ PoseNet modeli başarıyla yüklendi.");
+        console.log("✅ Model başarıyla yüklendi.");
 
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -22,7 +22,6 @@ async function init() {
 
             video.addEventListener('loadeddata', () => {
                 console.log("🎥 Kamera verisi yüklendi, poz tespiti başlıyor.");
-                // Canvas boyutunu videonun gerçek boyutuna ayarla
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
                 detectPose();
@@ -38,63 +37,56 @@ async function init() {
 
 async function detectPose() {
     if (detector && video.readyState >= 2) {
-        try {
-            poses = await detector.estimatePoses(video, {flipHorizontal: false});
-            drawCanvas();
-        } catch (error) {
-            console.error("❌ Poz tespiti sırasında hata:", error);
-        }
+        poses = await detector.estimatePoses(video, {flipHorizontal: false});
+        drawCanvas();
     }
-    // Döngüyü devam ettir
     requestAnimationFrame(detectPose);
 }
 
 function drawCanvas() {
-    // 1. Kameranın mevcut karesini canvas'a çiz
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    // 2. Eğer bir poz tespit edildiyse, iskeleti çiz
     if (poses && poses.length > 0) {
-        // console.log("🏃‍♂️ Poz tespit edildi:", poses[0].keypoints); // Çok fazla log üreteceği için kapalı
         countPushups(poses[0]);
         drawKeypoints(poses[0].keypoints);
         drawSkeleton(poses[0].keypoints);
     }
 }
 
-
-// --- Geri kalan fonksiyonlar aynı ---
-
 function getAngle(p1, p2, p3) {
+    // Güvenilirlik kontrolü: Eğer noktalardan biri tanımsızsa açı hesaplama.
+    if (!p1 || !p2 || !p3) return 0;
     const angleRad = Math.atan2(p3.y - p2.y, p3.x - p2.x) - Math.atan2(p1.y - p2.y, p1.x - p2.x);
     let degrees = Math.abs(angleRad * 180 / Math.PI);
     return degrees > 180 ? 360 - degrees : degrees;
 }
 
+// *** ÖN PROFİL İÇİN GÜNCELLENMİŞ FONKSİYON ***
 function countPushups(pose) {
-    // Sadece sol tarafı kullanıyoruz, kameraya göre sağ kolunuz olabilir.
-    const leftShoulder = pose.keypoints.find(k => k.name === 'left_shoulder');
-    const leftElbow = pose.keypoints.find(k => k.name === 'left_elbow');
-    const leftWrist = pose.keypoints.find(k => k.name === 'left_wrist');
+    const kp = pose.keypoints;
+    const leftShoulder = kp.find(k => k.name === 'left_shoulder' && k.score > 0.5);
+    const leftElbow = kp.find(k => k.name === 'left_elbow' && k.score > 0.5);
+    const leftWrist = kp.find(k => k.name === 'left_wrist' && k.score > 0.5);
+    
+    const rightShoulder = kp.find(k => k.name === 'right_shoulder' && k.score > 0.5);
+    const rightElbow = kp.find(k => k.name === 'right_elbow' && k.score > 0.5);
+    const rightWrist = kp.find(k => k.name === 'right_wrist' && k.score > 0.5);
 
-    const rightShoulder = pose.keypoints.find(k => k.name === 'right_shoulder');
-    const rightElbow = pose.keypoints.find(k => k.name === 'right_elbow');
-    const rightWrist = pose.keypoints.find(k => k.name === 'right_wrist');
-
-    // Hangi taraf daha güvenilir tespit ediliyorsa onu kullanalım
-    let angle = -1;
-    if (leftShoulder.score > 0.5 && leftElbow.score > 0.5 && leftWrist.score > 0.5) {
-        angle = getAngle(leftShoulder, leftElbow, leftWrist);
-    } else if (rightShoulder.score > 0.5 && rightElbow.score > 0.5 && rightWrist.score > 0.5) {
-        angle = getAngle(rightShoulder, rightElbow, rightWrist);
-    }
-
-    if (angle !== -1) {
+    // Her iki kolun da eklemleri görünürse açıları hesapla
+    if ((leftShoulder && leftElbow && leftWrist) && (rightShoulder && rightElbow && rightWrist)) {
+        const leftAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+        const rightAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+        
         // Açı eşiklerini buradan ayarlayabilirsiniz
-        if (angle < 90) { // Dirsek büküldüğünde (aşağı pozisyon)
+        const down_threshold = 90;
+        const up_threshold = 160;
+
+        // "Aşağı" durumu: Kollardan en az biri yeterince bükülmüşse
+        if (leftAngle < down_threshold || rightAngle < down_threshold) {
             stage = 'down';
         }
-        if (angle > 160 && stage === 'down') { // Dirsek düzleştiğinde (yukarı pozisyon)
+
+        // "Yukarı" durumu: Her iki kol da yeterince düzleşmişse ve önceki durum "aşağı" ise
+        if (leftAngle > up_threshold && rightAngle > up_threshold && stage === 'down') {
             stage = 'up';
             pushupCounter++;
             pushupCounterElement.innerText = pushupCounter;
@@ -108,7 +100,7 @@ function playBeep() {
     const oscillator = context.createOscillator();
     const gainNode = context.createGain();
     oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(523.25, context.currentTime); // C5 notası
+    oscillator.frequency.setValueAtTime(523.25, context.currentTime);
     gainNode.gain.setValueAtTime(0.3, context.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.1);
     oscillator.connect(gainNode);
@@ -120,9 +112,9 @@ function playBeep() {
 function drawKeypoints(keypoints) {
     for (const keypoint of keypoints) {
         if (keypoint.score > 0.5) {
-            ctx.fillStyle = 'red';
+            ctx.fillStyle = '#FF0000'; // Kırmızı
             ctx.beginPath();
-            ctx.arc(keypoint.x, keypoint.y, 5, 0, 2 * Math.PI);
+            ctx.arc(keypoint.x, keypoint.y, 6, 0, 2 * Math.PI);
             ctx.fill();
         }
     }
@@ -131,7 +123,7 @@ function drawKeypoints(keypoints) {
 function drawSkeleton(keypoints) {
     const adjacentKeyPoints = poseDetection.util.getAdjacentPairs(poseDetection.SupportedModels.MoveNet);
     ctx.strokeStyle = '#00FF00'; // Yeşil
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     adjacentKeyPoints.forEach((pair) => {
         const [i, j] = pair;
         const kp1 = keypoints[i];
